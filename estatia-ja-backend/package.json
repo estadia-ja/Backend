@@ -1,0 +1,28 @@
+{
+    "name": "estadia-ja",
+    "version": "1.0.0",
+    "description": "Estadia já",
+    "main": "src/index.js",
+    "scripts": {
+        "start": "node src/index.js",
+        "dev": "nodemon src/index.js",
+        "test": "jest"
+    },
+    "dependencies": {
+        "@prisma/client": "^5.12.1",
+        "dotenv": "^17.2.2",
+        "express": "^4.21.2",
+        "pg": "^8.16.3",
+        "prisma": "^5.12.1"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.3",
+        "@types/node": "^24.3.3",
+        "@types/swagger-ui-express": "^4.1.8",
+        "nodemon": "^3.0.0",
+        "swagger-jsdoc": "^6.2.8",
+        "swagger-ui-express": "^5.0.1",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.9.2"
+    }
+}
