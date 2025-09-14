@@ -1,20 +1,16 @@
-const { Pool } = require('pg');
-require('dotenv').config();
+const { PrismaClient } = require('@prisma/client');
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-});
+const prisma = new PrismaClient();
 
 const testConnection = async () => {
-    try{
-        const client = await pool.connect();
-        console.log('Conectado com o postgres')
-        client.release(); 
-        return true;
-    }catch (error) {
-        console.log('Erro de conecção com o banco', error.message);
-        return false;
+    try {
+        await prisma.$queryRaw`SELECT 1`;
+        console.log('Conectado oa PostgreSQL');
+        return true
+    } catch (error) {
+        console.log('Erro ao tentar conectar:', error.message);
+        return false
     }
 };
 
-module.exports = {pool, testConnection}
+module.exports = { prisma, testConnection }
