@@ -1,0 +1,21 @@
+const { createUserSchema, updateUserSchema } = require('../validations/userValidation');
+
+const validateCreateUser = (req, res, next) => {
+  const { error, value } = createUserSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+  req.validatedData = value;
+  next();
+};
+
+const validateUpdateUser = (req, res, next) => {
+  const { error, value } = updateUserSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+  req.validatedData = value;
+  next();
+};
+
+module.exports = { validateCreateUser, validateUpdateUser };

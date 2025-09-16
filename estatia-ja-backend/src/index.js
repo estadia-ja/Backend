@@ -1,12 +1,15 @@
 const express = require('express');
 const { testConnection } = require('./database');
 const { swaggerUi, specs } = require('./swagger');
-const userRoutes = require('./User/routes');
+const userRoutes = require('./user/routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json())
+
+//Rotas da api
+app.use('/user', userRoutes);
 
 //Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
@@ -28,9 +31,6 @@ app.get('/test-db', async (req,res) => {
         database: isConnected ? 'Conectado' : 'Error'
     });
 });
-
-//Rotas da api
-app.use('/user', userRoutes);
 
 app.listen(PORT, () => {
     console.log(`Rodando na porta ${PORT}`)
