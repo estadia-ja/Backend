@@ -21,7 +21,8 @@ const userController = {
 
     async getById(req, res) {
         try {
-            const user = await userService.getUserById(parseInt(req.params.id));
+            const { id } = req.params;
+            const user = await userService.getUserById(id);
             res.json(user.toJSON());
         } catch (error) {
             res.status(404).json({ error: error.message });

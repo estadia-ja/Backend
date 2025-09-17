@@ -41,7 +41,7 @@ const userService = {
 
     async getUserById(id) {
         const user = await prisma.user.findUnique({
-            where: { id },
+            where: { id: id },
             select : {
                 id: true,
                 name: true,
