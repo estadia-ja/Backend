@@ -58,7 +58,30 @@ const userService = {
         }
 
         return new User(user);
-    }
+    },
+
+    async updateUser(id, userData){
+        const existingUser = await prisma.user.findUnique({ where: {id: id}});
+        if(!existingUser){
+            throw new Error("Usuário não encontrado");
+        }
+
+        if(userData.email && userData.email !== existingUser) {
+            const emailExists = await prisma.user.findUnique({
+                where: { email: userData.email }
+            });
+            if(emailExists) {
+                throw new Error('Email já esta em uso');
+            }
+        }
+
+        const updateUser = await prisma.user.update({
+            where: { id: id },
+            data: userData
+        });
+
+        return new User(updateUser);
+    },
 }
 
 module.exports = userService;

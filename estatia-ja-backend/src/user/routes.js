@@ -6,5 +6,6 @@ const { validateCreateUser, validateUpdateUser } = require('../middlewares/valid
 router.post('/', validateCreateUser, userController.create);
 router.get('/', userController.getAll);
 router.get('/:id', userController.getById);
+router.put('/:id', validateUpdateUser,userController.update);
 
 module.exports = router;

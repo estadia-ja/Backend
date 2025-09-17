@@ -28,6 +28,16 @@ const userController = {
             res.status(404).json({ error: error.message });
         }
     },
+
+    async update(req, res) {
+        try {
+            const idUser = req.params.id
+            const user = await userService.updateUser(idUser, req.validatedData);
+            res.json(user.toJSON());
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    },
 }
 
 module.exports = userController;
