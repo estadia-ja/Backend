@@ -82,6 +82,15 @@ const userService = {
 
         return new User(updateUser);
     },
+
+    async deleteUser(id) {
+        const existingUser = await prisma.user.findUnique({ where: { id: id }});
+        if(!existingUser) {
+            throw new Error("Usuário não encontrado");
+        }
+
+        await prisma.user.delete({ where: { id: id }});
+    },
 }
 
 module.exports = userService;

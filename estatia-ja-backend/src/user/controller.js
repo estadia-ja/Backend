@@ -38,6 +38,16 @@ const userController = {
             res.status(400).json({ error: error.message });
         }
     },
+
+    async delete(req, res) {
+        try {
+            const idUser = req.params.id;
+            await userService.deleteUser(idUser);
+            res.status(204).send();
+        } catch (error) {
+            res.status(404).json({ error: error.message })
+        }
+    },
 }
 
 module.exports = userController;
