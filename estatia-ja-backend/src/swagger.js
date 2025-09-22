@@ -1,24 +1,42 @@
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
+const swaggerJSDoc = require('swagger-jsdoc');
 
-const options = {
-    definition: {
-        openapi: '3.0.0',
-        info: {
-            title: 'Estadia Já',
-            version: '1.0.0',
-            description: 'APi',
-        },
-        servers: [
-            {
-                url: 'http://localhost:3000',
-                description: 'Servidor de desenvolvimento',
-            },
-        ],
+const swaggerDefinition = {
+    openapi: '3.0.0',
+    info: {
+        title: 'Estadia ja',
+        version: '1.0.0',
+        description: 'Documentação da api'
     },
-    apis: ['./src/*.js'],
+    servers: [
+        {
+            url: 'http://localhost:3000',
+            description: 'Servidor de desenvolvimento'
+        },
+    ],
+    components:{
+        securitySchemes:{
+            bearerAuth: {
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT',
+            }
+        }
+    },
+    tags: [
+        {
+            name: 'Usuários',
+            description: 'Gerenciamento das rotas de usuário'
+        }
+    ],
 };
 
-const specs = swaggerJsdoc(options);
+const options = {
+    swaggerDefinition,
+    apis: [
+      './src/user/routes.js'
+    ],
+  };
 
-module.exports = { swaggerUi, specs };
+const swaggerSpec = swaggerJSDoc(options);
+
+module.exports = swaggerSpec;
