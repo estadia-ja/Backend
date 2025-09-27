@@ -3,10 +3,12 @@
     "version": "1.0.0",
     "description": "Estadia já",
     "main": "src/index.js",
+    "type": "module",
     "scripts": {
         "start": "node src/index.js",
         "dev": "nodemon src/index.js",
-        "test": "jest"
+        "test:unit": "vitest -c ./vitest.config.unit.ts",
+        "test:unit:ui": "vitest -c ./vitest.config.unit.ts --ui"
     },
     "dependencies": {
         "@prisma/client": "^5.0.0",
@@ -27,6 +29,8 @@
         "swagger-jsdoc": "^6.2.8",
         "swagger-ui-express": "^5.0.1",
         "ts-node": "^10.9.2",
-        "typescript": "^5.9.2"
+        "typescript": "^5.9.2",
+        "vitest": "^3.2.4",
+        "vitest-mock-extended": "^3.1.0"
     }
 }
