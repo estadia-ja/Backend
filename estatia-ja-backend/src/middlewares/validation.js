@@ -1,6 +1,6 @@
 import { createUserSchema, updateUserSchema } from '../validations/userValidation.js';
 
-const validateCreateUser = (req, res, next) => {
+export const validateCreateUser = (req, res, next) => {
   const { error, value } = createUserSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
@@ -9,7 +9,7 @@ const validateCreateUser = (req, res, next) => {
   next();
 };
 
-const validateUpdateUser = (req, res, next) => {
+export const validateUpdateUser = (req, res, next) => {
   const { error, value } = updateUserSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
@@ -17,5 +17,3 @@ const validateUpdateUser = (req, res, next) => {
   req.validatedData = value;
   next();
 };
-
-module.exports = { validateCreateUser, validateUpdateUser };

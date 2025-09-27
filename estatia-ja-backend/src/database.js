@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 
-const testConnection = async () => {
+export const testConnection = async () => {
     try {
         await prisma.$queryRaw`SELECT 1`;
         console.log('Conectado oa PostgreSQL');
@@ -12,5 +12,3 @@ const testConnection = async () => {
         return false
     }
 };
-
-module.exports = { prisma, testConnection }

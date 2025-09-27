@@ -161,4 +161,4 @@ router.put('/:id', validateUpdateUser, userController.update);
  */
 router.delete('/:id', userController.delete);
 
-module.exports = router;
+export default router;
