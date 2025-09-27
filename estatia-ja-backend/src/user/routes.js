@@ -1,8 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const userController = require('./controller');
-const { validateCreateUser, validateUpdateUser } = require('../middlewares/validation');
+import express from 'express';
+import { Router } from 'express';
+import userController from './controller.js';
+import { validateCreateUser, validateUpdateUser } from '../middlewares/validation.js';
 
+const router = Router(); 
+
+// ... o resto do seu código
 /**
  * @swagger
  * /user:

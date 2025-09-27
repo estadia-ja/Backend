@@ -1,5 +1,4 @@
-// src/validations/userValidation.js
-const Joi = require('joi');
+import Joi from 'joi';
 
 const createUserSchema = Joi.object({
   name: Joi.string().min(2).max(100).required(),

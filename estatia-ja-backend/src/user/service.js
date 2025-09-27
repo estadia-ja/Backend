@@ -1,6 +1,6 @@
-const bcrypt = require('bcrypt');
-const User = require('./model');
-const { prisma } = require('../database');
+import bcrypt from 'bcrypt';
+import User from './model.js';
+import { prisma } from '../database.js';
 
 const userService = {
     async createUser(userData) {

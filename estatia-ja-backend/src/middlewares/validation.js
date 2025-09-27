@@ -1,4 +1,4 @@
-const { createUserSchema, updateUserSchema } = require('../validations/userValidation');
+import { createUserSchema, updateUserSchema } from '../validations/userValidation.js';
 
 const validateCreateUser = (req, res, next) => {
   const { error, value } = createUserSchema.validate(req.body);

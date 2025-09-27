@@ -1,4 +1,4 @@
-const userService = require('./service');
+import userService from './service.js';
 
 const userController = {
     async create(req,res){

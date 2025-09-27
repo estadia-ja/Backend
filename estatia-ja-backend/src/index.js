@@ -1,8 +1,8 @@
-const express = require('express');
-const { testConnection } = require('./database');
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./swagger');
-const userRoutes = require('./user/routes');
+import express from 'express';
+import { testConnection } from './database.js';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './swagger.js';
+import userRoutes from './user/routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
