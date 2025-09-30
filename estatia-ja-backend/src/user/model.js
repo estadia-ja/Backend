@@ -6,6 +6,7 @@ class User {
         this.phone = data.phone;
         this.cpf = data.cpf;
         this.password = data.password;
+        this.image = data.image;
         this.createdAt = data.createdAt;
         this.updatedAt = data.updatedAt;
     }

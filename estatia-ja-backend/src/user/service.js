@@ -91,6 +91,29 @@ const userService = {
 
         await prisma.user.delete({ where: { id: id }});
     },
+
+    async updateImage(id, imageBuffer) {
+        const user = await prisma.user.update({
+            where: { id },
+            data: { image: imageBuffer }
+        });
+    
+        return new User(user);
+    },
+    
+
+    async getImage(id) {
+        const user = await prisma.user.findUnique({
+            where: { id: id },
+            select: {image: true }
+        });
+
+        if(!user || !user.image){
+            throw new Error("Imagem não encontrada");
+        }
+
+        return user.image;
+    },
 }
 
 export default userService;

@@ -1,11 +1,11 @@
-import express from 'express';
-import { Router } from 'express';
-import userController from './controller.js';
-import { validateCreateUser, validateUpdateUser } from '../middlewares/validation.js';
+import { Router } from "express";
+import multer from "multer";
+import userController from "./controller.js";
+import { validateCreateUser, validateUpdateUser } from "../middlewares/validation.js";
 
-const router = Router(); 
+const router = Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
-// ... o resto do seu código
 /**
  * @swagger
  * /user:
@@ -31,21 +31,10 @@ const router = Router();
  *     responses:
  *       201:
  *         description: Usuário criado com sucesso.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                 name:
- *                   type: string
- *                 email:
- *                   type: string
  *       400:
  *         description: Erro na validação dos dados.
  */
-router.post('/', validateCreateUser, userController.create);
+router.post("/", validateCreateUser, userController.create);
 
 /**
  * @swagger
@@ -56,21 +45,8 @@ router.post('/', validateCreateUser, userController.create);
  *     responses:
  *       200:
  *         description: Lista de usuários obtida com sucesso.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                   name:
- *                     type: string
- *                   email:
- *                     type: string
  */
-router.get('/', userController.getAll);
+router.get("/", userController.getAll);
 
 /**
  * @swagger
@@ -84,25 +60,13 @@ router.get('/', userController.getAll);
  *         required: true
  *         schema:
  *           type: string
- *         description: ID do usuário
  *     responses:
  *       200:
  *         description: Usuário encontrado.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                 name:
- *                   type: string
- *                 email:
- *                   type: string
  *       404:
  *         description: Usuário não encontrado.
  */
-router.get('/:id', userController.getById);
+router.get("/:id", userController.getById);
 
 /**
  * @swagger
@@ -116,7 +80,6 @@ router.get('/:id', userController.getById);
  *         required: true
  *         schema:
  *           type: string
- *         description: ID do usuário
  *     requestBody:
  *       required: true
  *       content:
@@ -126,7 +89,7 @@ router.get('/:id', userController.getById);
  *             properties:
  *               name:
  *                 type: string
- *                 example: João da Silva Atualizado
+ *                 example: João Atualizado
  *               email:
  *                 type: string
  *                 example: joao.atualizado@email.com
@@ -138,7 +101,7 @@ router.get('/:id', userController.getById);
  *       404:
  *         description: Usuário não encontrado.
  */
-router.put('/:id', validateUpdateUser, userController.update);
+router.put("/:id", validateUpdateUser, userController.update);
 
 /**
  * @swagger
@@ -152,13 +115,66 @@ router.put('/:id', validateUpdateUser, userController.update);
  *         required: true
  *         schema:
  *           type: string
- *         description: ID do usuário
  *     responses:
- *       200:
+ *       204:
  *         description: Usuário deletado com sucesso.
  *       404:
  *         description: Usuário não encontrado.
  */
-router.delete('/:id', userController.delete);
+router.delete("/:id", userController.delete);
+
+/**
+ * @swagger
+ * /user/{id}/upload:
+ *   post:
+ *     summary: Faz upload de uma imagem para o usuário
+ *     tags: [Usuários]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do usuário
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Imagem salva com sucesso
+ *       400:
+ *         description: Nenhum arquivo enviado
+ */
+router.post("/:id/upload", upload.single("image"), userController.uploadImage);
+
+/**
+ * @swagger
+ * /user/{id}/image:
+ *   get:
+ *     summary: Retorna a imagem do usuário pelo ID
+ *     tags: [Usuários]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Imagem retornada com sucesso
+ *         content:
+ *           image/png: {}
+ *           image/jpeg: {}
+ *       404:
+ *         description: Usuário ou imagem não encontrada
+ */
+router.get("/:id/image", userController.getImage);
 
 export default router;

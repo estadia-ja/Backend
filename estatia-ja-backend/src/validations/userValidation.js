@@ -13,5 +13,5 @@ export const updateUserSchema = Joi.object({
   email: Joi.string().email().optional(),
   phone: Joi.string().pattern(/^\(\d{2}\) \d{4,5}-\d{4}$/).optional(),
   cpf: Joi.string().pattern(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/).optional(),
-  password: Joi.string().min(6).required()
+  password: Joi.string().min(6).optional()
 });

@@ -48,6 +48,34 @@ const userController = {
             res.status(404).json({ error: error.message })
         }
     },
+
+    async uploadImage(req, res) {
+        try {
+            const { id } = req.params;
+            const imageBuffer = req.file?.buffer;
+
+            if (!imageBuffer) {
+                return res.status(400).json({ error: "Nenhum arquivo enviado" });
+            }
+
+            const user = await userService.updateImage(id, imageBuffer);
+            res.json(user.toJSON());
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    },
+
+    async getImage(req, res) {
+        try {
+            const { id } = req.params;
+            const image = await userService.getImage(id);
+
+            res.set("Content-Type", "image/png");
+            res.send(image);
+        } catch (error) {
+            res.status(404).json({ error: error.message });
+        }
+    }
 }
 
 export default userController;
