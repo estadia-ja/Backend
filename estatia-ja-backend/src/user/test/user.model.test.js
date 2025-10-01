@@ -10,6 +10,7 @@ describe('test user model', () => {
             phone: '(11) 11111-1111',
             cpf: '12345678901',
             password: 'hashedPassword123',
+            image: Buffer.from('imageTest'),
             createdAt: new Date('2025-01-01'),
             updatedAt: new Date('2025-01-02')
         };
@@ -22,6 +23,7 @@ describe('test user model', () => {
         expect(user.phone).toBe('(11) 11111-1111');
         expect(user.cpf).toBe('12345678901');
         expect(user.password).toBe('hashedPassword123');
+        expect(user.image).toEqual(Buffer.from('imageTest'));
         expect(user.createdAt).toEqual(new Date('2025-01-01'));
         expect(user.updatedAt).toEqual(new Date('2025-01-02'));
     });
@@ -34,6 +36,7 @@ describe('test user model', () => {
             phone: '(11) 11111-1111',
             cpf: '12345678901',
             password: 'hashedPassword123',
+            image: Buffer.from('imageTest'),
             createdAt: new Date('2025-01-01'),
             updatedAt: new Date('2025-01-02')
         };
@@ -47,6 +50,7 @@ describe('test user model', () => {
             email: 'pedro@test.com',
             phone: '(11) 11111-1111',
             cpf: '12345678901',
+            image: Buffer.from('imageTest'),
             createdAt: new Date('2025-01-01'),
             updatedAt: new Date('2025-01-02')
         });

@@ -17,6 +17,7 @@ class User {
           email: this.email,
           phone: this.phone,
           cpf: this.cpf,
+          image: this.image,
           createdAt: this.createdAt,
           updatedAt: this.updatedAt
         };
