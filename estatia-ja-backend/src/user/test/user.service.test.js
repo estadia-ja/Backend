@@ -187,4 +187,52 @@ describe('test user service', () => {
             expect(result).toBeUndefined()
         });
     });
+
+    describe('updateImage', () => {
+        it('should update the user image', async () => {
+            const imageBuffer = Buffer.from('imageTest');
+            const userTest = { id: 1, name: 'Pedro', email: 'pedro@test.com', image: imageBuffer };
+
+            prisma.user.update.mockResolvedValue(userTest);
+            const result = await userService.updateImage(1, imageBuffer);
+
+            expect(prisma.user.update).toHaveBeenCalledWith({
+                where: { id: 1 },
+                data: { image: imageBuffer}
+            });
+            expect(result).toBeInstanceOf(User);
+            expect(result.image).toEqual(imageBuffer);
+        });
+    });
+
+    describe('getImage', () => {
+        it('should return user image', async () => {
+            const imageBuffer = Buffer.from('imageTest');
+            prisma.user.findUnique.mockResolvedValue({ image: imageBuffer });
+
+            const result = await userService.getImage(1);
+            
+            expect(prisma.user.findUnique).toHaveBeenCalledWith({
+                where: { id: 1 },
+                select: { image: true }
+            });
+            expect(result).toEqual(imageBuffer);
+        });
+
+        it('should throw error if user does not exists', async () => {
+            prisma.user.findUnique.mockResolvedValue(null);
+
+            await expect(userService.getImage(99))
+                .rejects
+                .toThrow('Usuário não encontrada');
+        });
+
+        it('should throw error if user has no image', async () => {
+            prisma.user.findUnique.mockResolvedValue({ image: null });
+
+            await expect(userService.getImage(19))
+                .rejects
+                .toThrow('Imagem não encontrada');
+        });
+    })
 })

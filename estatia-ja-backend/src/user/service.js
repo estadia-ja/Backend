@@ -108,7 +108,11 @@ const userService = {
             select: {image: true }
         });
 
-        if(!user || !user.image){
+        if(!user){
+            throw new Error("Usuário não encontrada");
+        }
+
+        if(!user.image){
             throw new Error("Imagem não encontrada");
         }
 
