@@ -10,6 +10,8 @@ vi.mock('../service', () => ({
         getUserById: vi.fn(),
         updateUser: vi.fn(),
         deleteUser: vi.fn(),
+        getImage: vi.fn(),
+        updateImage: vi.fn()
     }
 }));
 
@@ -142,6 +144,55 @@ describe('test user controller', () => {
 
             expect(res.status).toHaveBeenCalledWith(404);
             expect(res.json).toHaveBeenCalledWith({ error: 'Usuário não encontrado' });
+        });
+    });
+
+    describe('uploadImage', () => {
+        it('should upload an image', async () => {
+            const imageBuffer = Buffer.from('imageTest');
+            const req = { params: { id: 1 }, file: { buffer: imageBuffer } };
+            const userTest = { toJSON: () => ({ id: 1, name: 'Pedro', image: 'imageTest' }) };
+
+            userService.updateImage.mockResolvedValue(userTest);
+            await userController.uploadImage(req, res);
+
+            expect(userService.updateImage).toHaveBeenCalledWith(1, imageBuffer);
+            expect(res.json).toHaveBeenCalledWith({ id: 1, name: 'Pedro', image: 'imageTest' });
+        });
+
+        it('should return 400 if no file is provided', async () => {
+            const req = { params: { id: 1}, file: { iamge: null} };
+
+            await userController.uploadImage(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({ error:"Nenhum arquivo enviado" });
+            expect(userService.updateImage).not.toHaveBeenCalled()
+        });
+    });
+
+    describe('getImage', () => {
+        it('should return image', async () => {
+            const imageBuffer = Buffer.from('imageTest');
+            const req = { params: { id: 1 } };
+
+            userService.getImage.mockResolvedValue(imageBuffer);
+            res.set = vi.fn().mockResolvedValue(res);
+            await userController.getImage(req, res);
+
+            expect(userService.getImage).toHaveBeenCalledWith(1);
+            expect(res.set).toHaveBeenCalledWith("Content-Type", "image/png");
+            expect(res.send).toHaveBeenCalledWith(imageBuffer);
+        });
+
+        it('should throw error 404 if image not found', async () => {
+            const req = { params: { id: 1 } };
+
+            userService.getImage.mockRejectedValue(new Error('Image não encontrada'));
+            await userController.getImage(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Image não encontrada' });
         });
     });
 
