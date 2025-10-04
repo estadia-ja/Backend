@@ -197,5 +197,35 @@ describe('User Routes - Integration Tests (End-to-End', () => {
       expect(response.body.error).toContain('Email já esta em uso')
     });
   });
+
+  describe('delete /user/:id', () => {
+    it('should delete a user', async () => {
+      const userTest = {
+        name: 'Pedro',
+        email: 'pedro.test@example.com',
+        password: 'Password123', 
+      };
+
+      const createUser = await prisma.user.create({
+        data: userTest,
+      });
+
+      const response = await request(app).delete(`/user/${createUser.id}`);
+
+      expect(response.status).toBe(204);
+      const userInDb = await prisma.user.findUnique({
+        where: { id: createUser.id },
+      });
+      expect(userInDb).toBeNull();
+    });
+
+    it('should return a error if userr does not exists', async () => {
+      const noExistentId = 'clxjhg82z00001234abcd1234';
+      const response = await request(app).delete(`/user/${noExistentId}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error).toContain('Usuário não encontrado');
+    });
+  });
 });
 
