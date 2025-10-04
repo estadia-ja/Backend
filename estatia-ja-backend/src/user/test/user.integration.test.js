@@ -126,5 +126,76 @@ describe('User Routes - Integration Tests (End-to-End', () => {
       expect(response.body.error).toContain('Usuário não encontrado');
     });
   });
+
+  describe('update /user/:d', () => {
+    it('should update a user', async () => {
+      const userTest = {
+        name: 'Pedro',
+        email: 'pedro.test@example.com',
+        password: 'Password123', 
+      };
+
+      const createUser = await prisma.user.create({
+        data: userTest,
+      });
+
+      const userUpdate = {
+        email: 'pedro.test.update@example.com'
+      };
+
+      const response = await request(app)
+        .put(`/user/${createUser.id}`)
+        .send(userUpdate)
+
+      expect(response.status).toBe(200);
+      expect(response.body.email).toBe(userUpdate.email);
+      const userInDb = await prisma.user.findUnique({ 
+        where: { id: createUser.id },
+      });
+      expect(userInDb.email).toBe(userUpdate.email);
+    });
+
+    it('should reutrna erro if user does not exist', async () => {
+      const noExistentId = 'clxjhg82z00001234abcd1234';
+      const userUpdate = {
+        email: 'pedro.test.update@example.com'
+      };
+      const response = await request(app)
+        .put(`/user/${noExistentId}`)
+        .send(userUpdate)
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toContain('Usuário não encontrado');
+    });
+
+    it('should reutrna erro if email exists in db', async () => {
+      const userA = await prisma.user.create({
+        data: {
+          name: 'Pedro Teste',
+          email: 'pedro@test.com',
+          password: 'Password123',
+        },
+      });
+    
+      const userB = await prisma.user.create({
+        data: {
+          name: 'Maria Teste',
+          email: 'maria@test.com',
+          password: 'Password456',
+        },
+      });
+    
+      const userUpdate = {
+        email: userB.email,
+      };
+    
+      const response = await request(app)
+        .put(`/user/${userA.id}`)
+        .send(userUpdate);
+    
+      expect(response.status).toBe(400)
+      expect(response.body.error).toContain('Email já esta em uso')
+    });
+  });
 });
 
