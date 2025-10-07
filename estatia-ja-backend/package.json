@@ -11,7 +11,8 @@
         "test:unit:ui": "vitest -c ./vitest.config.unit.ts --ui",
         "test:integration": "docker compose up -d db-test && dotenv -e .env.test -- vitest run -c ./vitest.config.integration.ts && docker compose stop db-test",
         "test:integration:run": "dotenv -e .env.test -- vitest run -c ./vitest.config.integration.ts",
-        "test:integration:ci": "docker compose up -d db-test app && docker compose exec app npm run test:integration:run && docker compose down"
+        "test:integration:ci": "docker compose up -d db-test app && docker compose exec app npm run test:integration:run && docker compose down",
+        "test:all": "npm run test:unit && npm run test:integration:run"
     },
     "dependencies": {
         "@prisma/client": "^5.0.0",
