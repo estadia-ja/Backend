@@ -25,12 +25,42 @@ const upload = multer({ storage: multer.memoryStorage() });
  *               email:
  *                 type: string
  *                 example: joao.silva@email.com
+ *               cpf:
+ *                 type: string
+ *                 example: "123.456.789-00"
  *               password:
  *                 type: string
  *                 example: SenhaSegura123
+ *               phones:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   example: "(11) 98765-4321"
  *     responses:
  *       201:
  *         description: Usuário criado com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 cpf:
+ *                   type: string
+ *                 phones:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       phone:
+ *                         type: string
  *       400:
  *         description: Erro na validação dos dados.
  */
@@ -93,6 +123,11 @@ router.get("/:id", userController.getById);
  *               email:
  *                 type: string
  *                 example: joao.atualizado@email.com
+ *               phones:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   example: "(11) 99999-8888"
  *     responses:
  *       200:
  *         description: Usuário atualizado com sucesso.

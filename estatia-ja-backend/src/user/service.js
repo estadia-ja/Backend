@@ -4,35 +4,69 @@ import { prisma } from '../database.js';
 
 const userService = {
     async createUser(userData) {
-        const existingUser = await prisma.user.findUnique({
-            where: {email: userData.email }
-        });
-        if (existingUser){
-            throw new Error('Email já cadastrado!', existingUser);
-        }
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
-
-        const user = await prisma.user.create({
-            data: {
-                ...userData,
-                password: hashedPassword
+        const { phones, ...userOnlyData } = userData;
+    
+        const existingUser = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { email: userOnlyData.email },
+                    { cpf: userOnlyData.cpf }
+                ]
             }
         });
-
-        return new User(user);
+    
+        if (existingUser) {
+            throw new Error('Email ou CPF já cadastrado!');
+        }
+    
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(userOnlyData.password, saltRounds);
+    
+        const newUser = await prisma.$transaction(async (tx) => {
+            const user = await tx.user.create({
+                data: {
+                    ...userOnlyData,
+                    password: hashedPassword
+                }
+            });
+    
+            if (phones && phones.length > 0) {
+                await tx.phone.createMany({
+                    data: phones.map(p => ({
+                        phone: p,
+                        userId: user.id
+                    }))
+                });
+            }
+            return user;
+        });
+    
+        const userWithPhones = await prisma.user.findUnique({
+            where: {
+                id: newUser.id
+            },
+            include: {
+                phones: {
+                    select: {
+                        id: true,
+                        phone: true
+                    }
+                }
+            }
+        });
+        
+        return new User(userWithPhones);
     },
 
     async getAllUsers(){
         const users = await prisma.user.findMany({
-            select : {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
-                cpf: true,
-                createdAt: true,
-                updatedAt: true
+            include: {
+                phones: {
+                    select: {
+                        id: true,
+                        phone: true
+                    }
+                }
             }
         });
         
@@ -42,14 +76,13 @@ const userService = {
     async getUserById(id) {
         const user = await prisma.user.findUnique({
             where: { id: id },
-            select : {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
-                cpf: true,
-                createdAt: true,
-                updatedAt: true
+            include: {
+                phones: {
+                    select: {
+                        id: true,
+                        phone: true
+                    }
+                }
             }
         });
 
@@ -61,6 +94,7 @@ const userService = {
     },
 
     async updateUser(id, userData){
+        const {phones, ...userOnlyData} = userData
         const existingUser = await prisma.user.findUnique({ where: {id: id}});
         if(!existingUser){
             throw new Error('Usuário não encontrado');
@@ -75,12 +109,29 @@ const userService = {
             }
         }
 
-        const updateUser = await prisma.user.update({
-            where: { id: id },
-            data: userData
+        const updatedUser = await prisma.$transaction(async (tx) =>{
+            const user = await tx.user.update({
+                where:{ id: id },
+                data: {...userOnlyData}
+            });
+
+            if(phones) {
+                await tx.phone.deleteMany({
+                    where:{ userId: id }
+                });
+
+                await tx.phone.createMany({
+                    data: phones.map(p => ({
+                        phone: p,
+                        userId: id
+                    }))
+                });
+            }
+            return user;
         });
 
-        return new User(updateUser);
+        const userWithPhones = await this.getUserById(updatedUser.id);
+        return new User(userWithPhones);
     },
 
     async deleteUser(id) {
