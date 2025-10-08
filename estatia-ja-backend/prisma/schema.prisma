@@ -14,15 +14,120 @@ datasource estadia_db {
 }
 
 model User {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   name      String
-  email     String   @unique
-  phone     String?
-  cpf       String?
+  email     String    @unique
   password  String
-  image     Bytes?
+  userImage Bytes?
+  cpf       String    @unique // CPF deve ser único
+
+  // Relações
+  phones     Phone[]
+  properties Property[]
+  reserves   Reserve[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("users")
+}
+
+model Phone {
+  id     String @id @default(cuid())
+  phone  String @unique // Telefone deve ser único
+
+  // Chave estrangeira para User
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade) // onDelete: Cascade deleta os telefones se o usuário for deletado
+
+  @@map("phones")
+}
+
+model Property {
+  id              String  @id @default(cuid())
+  type            String
+  description     String
+  numberOfBedroom Int
+  numberOfSuite   Int
+  numberOfGarage  Int
+  numberOfRoom    Int
+  numberOfBathroom Int
+  outdoorArea     Boolean
+  pool            Boolean
+  barbecue        Boolean
+  street          String
+  number          Int
+  neighborhood    String
+  state           String
+  city            String
+  CEP             String
+  dailyRate       Float
+
+  // Chave estrangeira para User (proprietário)
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Relações
+  images   PropertyImage[]
+  reserves Reserve[]
+
+  @@map("properties")
+}
+
+model PropertyImage {
+  id    String @id @default(cuid())
+  image String // URL ou path da imagem
+
+  // Chave estrangeira para Property
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("property_images")
+}
+
+model Reserve {
+  id        String   @id @default(cuid())
+  dateStart DateTime
+  dateEnd   DateTime
+  status    String // Ex: "confirmada", "pendente", "cancelada"
+
+  // Chave estrangeira para Property
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+
+  // Chave estrangeira para User (quem reservou)
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Relações 1-para-1
+  propertyValuation PropertyValuation?
+  clientValuation   ClientValuation?
+
+  @@map("reserves")
+}
+
+model PropertyValuation {
+  id                 String   @id @default(cuid())
+  noteProperty       Float
+  commentProperty    String?
+  datePropertyValuation DateTime @default(now())
+
+  // Chave estrangeira para Reserve (relação 1-para-1)
+  reserveId String  @unique
+  reserve   Reserve @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+
+  @@map("property_valuations")
+}
+
+model ClientValuation {
+  id               String   @id @default(cuid())
+  noteClient       Float
+  commentClient    String?
+  dateClientValuation DateTime @default(now())
+
+  // Chave estrangeira para Reserve (relação 1-para-1)
+  reserveId String  @unique
+  reserve   Reserve @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+
+  @@map("client_valuations")
 }
