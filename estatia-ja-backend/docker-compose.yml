@@ -63,8 +63,7 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
-    command: sh -c "npm install && npx prisma migrate deploy && npx prisma generate && npm run dev"
-  
+
   tester:
       build: .
       container_name: node_app_tester
