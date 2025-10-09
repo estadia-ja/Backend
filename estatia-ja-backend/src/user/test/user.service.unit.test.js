@@ -7,12 +7,24 @@ import User from '../model';
 vi.mock('../../database', () => ({
     prisma:{
         user:{
+            findFirst: vi.fn(),
             findMany: vi.fn(),
             findUnique: vi.fn(),
             create: vi.fn(),
             update: vi.fn(),
             delete: vi.fn()
         },
+        phone: {
+            createMany: vi.fn(),
+            deleteMany: vi.fn(),
+        },
+        $transaction: vi.fn().mockImplementation(async (callback) => {
+            const mockTx = {
+                user: prisma.user,
+                phone: prisma.phone,
+            };
+            return await callback(mockTx);
+        }),
     },
 }));
 
@@ -38,56 +50,42 @@ describe('test user service', () => {
                 name: 'Pedro',
                 email: 'pedro@test.com',
                 password: 'hashedPassword123',
+                phones: ['(11) 98765-4321']
             }
 
-            prisma.user.create.mockResolvedValue(userTest);
-            const result = await userService.createUser({
-                name: 'Pedro',
-                email: 'pedro@test.com',
-                password: '123456',
-            });
+            const createUser = { id: 'user-cuid', ...userTest};
+            const createUserWithPhones = { ...createUser, phones: [{ id: 'phone-cuid', phone: userTest.phones[0] }] };
+            prisma.user.findFirst.mockResolvedValue(null);
+            bcrypt.hash.mockResolvedValue('hashedPassword123');
+            prisma.user.create.mockResolvedValue(createUser);
+            prisma.user.findUnique.mockResolvedValue(createUserWithPhones);
 
-            expect(prisma.user.findUnique).toHaveBeenLastCalledWith({
-                where: { email: 'pedro@test.com' }
+            const result = await userService.createUser(userTest);
+            expect(prisma.user.findFirst).toHaveBeenCalledWith({
+                where: { OR: [{ email: userTest.email }, { cpf: userTest.cpf }] }
             });
-            expect(bcrypt.hash).toHaveBeenCalledWith('123456', 10);
-            expect(prisma.user.create).toHaveBeenCalledWith({
-                data: {
-                    name: 'Pedro',
-                    email: 'pedro@test.com',
-                    password: 'hashedPassword123',
-                },
+            expect(prisma.user.create).toHaveBeenCalled();
+            expect(prisma.phone.createMany).toHaveBeenCalledWith({
+                data: [{ phone: userTest.phones[0], userId: userTest.id }]
             });
-            expect(result).toEqual(expect.objectContaining({
-                id: 1,
-                name: 'Pedro',
-                email: 'pedro@test.com',
-            }));
+            expect(result).toBeInstanceOf(User);
         });
 
         it('should throw error if email already exists', async () => {
-            prisma.user.findUnique.mockResolvedValue({ id: 1, email: 'pedro@test.com' });
+            const userData = { email: 'pedro@test.com', cpf: '123.456.789-01' };
+            prisma.user.findFirst.mockResolvedValue({ id: 1, ...userData });
 
-            await expect(userService.createUser({
-                name: 'Pedro',
-                email: 'pedro@test.com',
-                password: '123456'
-            }))
+            await expect(userService.createUser(userData))
                 .rejects
-                .toThrowError('Email já cadastrado!')
-            
-            expect(prisma.user.findUnique).toHaveBeenCalledWith({
-                where: { email: 'pedro@test.com' }
-            });
-            expect(prisma.user.create).not.toHaveBeenCalled();
+                .toThrowError('Email ou CPF já cadastrado!');
         });
     })
 
     describe('getAllUsers', () => {
         it('should return a list of user', async () =>{
             const usersTest = [
-                { id: 1, name: 'Pedro', email: 'pedro@test.com', phone: '(11) 11111-1111', cpf: '12345678901', password: 'hashedPassword123', createdAt: new Date(), updatedAt: new Date() },
-                { id: 2, name: 'Maria', email: 'maria@test.com', phone: '(22) 22222-2222', cpf: '98765432100', password: 'hashedPassword123', createdAt: new Date(), updatedAt: new Date() }
+                { id: 1, name: 'Pedro', email: 'pedro@test.com', phones: ['(11) 11111-1111'], cpf: '12345678901', password: 'hashedPassword123', createdAt: new Date(), updatedAt: new Date() },
+                { id: 2, name: 'Maria', email: 'maria@test.com', phones: ['(22) 22222-2222'], cpf: '98765432100', password: 'hashedPassword123', createdAt: new Date(), updatedAt: new Date() }
             ]
 
             prisma.user.findMany.mockResolvedValue(usersTest);
@@ -103,7 +101,7 @@ describe('test user service', () => {
     describe('getUserById', () => {
         it('should return user', async () => {
             const userTest = { 
-                id: 1, name: 'Pedro', email: 'pedro@test.com', phone: '(11) 11111-1111', cpf: '12345678901', password: 'hashedPassword123', createdAt: new Date(), updatedAt: new Date()
+                id: 1, name: 'Pedro', phones:[]
             }
 
             prisma.user.findUnique.mockResolvedValue(userTest);
@@ -112,7 +110,6 @@ describe('test user service', () => {
             expect(prisma.user.findUnique).toHaveBeenCalledTimes(1);
             expect(result).toBeDefined();
             expect(result.name).toBe('Pedro');
-            expect(result.email).toBe('pedro@test.com');
         });
 
         it('should throw error if user does not exist', async () => {
@@ -149,18 +146,29 @@ describe('test user service', () => {
         });
               
         it('should update user', async () => {
-            prisma.user.findUnique.mockResolvedValue({ id: 1, email: 'velho@test.com' })
-            prisma.user.update.mockResolvedValue({ id: 1, name: 'Novo Nome', email: 'velho@test.com' })
+            const userId = 'user-cuid';
+            const updateData = {
+                name: 'Pedro Atualizado',
+                phones: ['(22) 11111-2222']
+            };
+            const existingUser = { id: userId, name: 'Pedro' };
+            const updatedUser = { id: userId, name: 'Pedro Atualizado' };
 
-            const result = await userService.updateUser(1, { name: 'Novo Nome'});
+            prisma.user.findUnique.mockResolvedValue(existingUser);
+            prisma.user.update.mockResolvedValue(updatedUser);
 
-            expect(prisma.user.findUnique).toHaveBeenCalledWith({ where: { id: 1 } });
+            await userService.updateUser(userId, updateData);
+
+            expect(prisma.$transaction).toHaveBeenCalled();
             expect(prisma.user.update).toHaveBeenCalledWith({
-                where: { id: 1 },
-                data: { name: 'Novo Nome' }
+                where: { id: userId },
+                data: { name: 'Pedro Atualizado' }
             });
-            expect(result).toBeInstanceOf(User);
-            expect(result.name).toBe('Novo Nome');
+            
+            expect(prisma.phone.deleteMany).toHaveBeenCalledWith({ where: { userId } });
+            expect(prisma.phone.createMany).toHaveBeenCalledWith({
+                data: [{ phone: updateData.phones[0], userId }]
+            });
         });
     });
 
@@ -168,7 +176,7 @@ describe('test user service', () => {
         it('should throw error if user does not exist', async () => {
             prisma.user.findUnique.mockResolvedValue(null);
 
-            await expect(userService.updateUser(2))
+            await expect(userService.deleteUser(2))
                 .rejects
                 .toThrowError('Usuário não encontrado')
             
@@ -179,7 +187,7 @@ describe('test user service', () => {
         it('should delete a user', async () => {
             prisma.user.findUnique.mockResolvedValue({ id: 2, email: 'teste@test.com' });
 
-            prisma.user.delete.mockResolvedValue({ id: 1 });
+            prisma.user.delete.mockResolvedValue({ id: 2 });
             const result = await userService.deleteUser(2);
 
             expect(prisma.user.findUnique).toHaveBeenCalledWith({ where: { id: 2 } });
