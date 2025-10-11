@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,71 +8,60 @@ datasource estadia_db {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  name      String
-  email     String    @unique
-  password  String
-  userImage Bytes?
-  cpf       String    @unique // CPF deve ser único
-
-  // Relações
+  id         String     @id @default(cuid())
+  name       String
+  email      String     @unique
+  password   String
+  userImage  Bytes?
+  cpf        String     @unique
   phones     Phone[]
   properties Property[]
   reserves   Reserve[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   @@map("users")
 }
 
 model Phone {
   id     String @id @default(cuid())
-  phone  String @unique // Telefone deve ser único
-
-  // Chave estrangeira para User
+  phone  String @unique
   userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade) // onDelete: Cascade deleta os telefones se o usuário for deletado
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("phones")
 }
 
 model Property {
-  id              String  @id @default(cuid())
-  type            String
-  description     String
-  numberOfBedroom Int
-  numberOfSuite   Int
-  numberOfGarage  Int
-  numberOfRoom    Int
+  id               String          @id @default(cuid())
+  type             String
+  description      String
+  numberOfBedroom  Int
+  numberOfSuite    Int
+  numberOfGarage   Int
+  numberOfRoom     Int
   numberOfBathroom Int
-  outdoorArea     Boolean
-  pool            Boolean
-  barbecue        Boolean
-  street          String
-  number          Int
-  neighborhood    String
-  state           String
-  city            String
-  CEP             String
-  dailyRate       Float
-
-  // Chave estrangeira para User (proprietário)
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  // Relações
-  images   PropertyImage[]
-  reserves Reserve[]
+  outdoorArea      Boolean
+  pool             Boolean
+  barbecue         Boolean
+  street           String
+  number           Int
+  neighborhood     String
+  state            String
+  city             String
+  CEP              String
+  dailyRate        Float
+  userId           String
+  user             User            @relation(fields: [userId], references: [id])
+  images           PropertyImage[]
+  reserves         Reserve[]
 
   @@map("properties")
 }
 
 model PropertyImage {
-  id    String @id @default(cuid())
-  image String // URL ou path da imagem
-
-  // Chave estrangeira para Property
+  id         String   @id @default(cuid())
+  image      String
   propertyId String
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
@@ -86,48 +69,49 @@ model PropertyImage {
 }
 
 model Reserve {
-  id        String   @id @default(cuid())
-  dateStart DateTime
-  dateEnd   DateTime
-  status    String // Ex: "confirmada", "pendente", "cancelada"
-
-  // Chave estrangeira para Property
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [id])
-
-  // Chave estrangeira para User (quem reservou)
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  // Relações 1-para-1
+  id                String             @id @default(cuid())
+  dateStart         DateTime
+  dateEnd           DateTime
+  status            String
+  propertyId        String
+  property          Property           @relation(fields: [propertyId], references: [id])
+  userId            String
+  user              User               @relation(fields: [userId], references: [id])
   propertyValuation PropertyValuation?
   clientValuation   ClientValuation?
+  payment           Payment?
 
   @@map("reserves")
 }
 
 model PropertyValuation {
-  id                 String   @id @default(cuid())
-  noteProperty       Float
-  commentProperty    String?
+  id                    String   @id @default(cuid())
+  noteProperty          Float
+  commentProperty       String?
   datePropertyValuation DateTime @default(now())
-
-  // Chave estrangeira para Reserve (relação 1-para-1)
-  reserveId String  @unique
-  reserve   Reserve @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+  reserveId             String   @unique
+  reserve               Reserve  @relation(fields: [reserveId], references: [id], onDelete: Cascade)
 
   @@map("property_valuations")
 }
 
 model ClientValuation {
-  id               String   @id @default(cuid())
-  noteClient       Float
-  commentClient    String?
+  id                  String   @id @default(cuid())
+  noteClient          Float
+  commentClient       String?
   dateClientValuation DateTime @default(now())
-
-  // Chave estrangeira para Reserve (relação 1-para-1)
-  reserveId String  @unique
-  reserve   Reserve @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+  reserveId           String   @unique
+  reserve             Reserve  @relation(fields: [reserveId], references: [id], onDelete: Cascade)
 
   @@map("client_valuations")
+}
+
+model Payment {
+  id           String   @id @default(cuid())
+  paymentValue Float
+  datePayment  DateTime
+  reserveId    String   @unique
+  reserve      Reserve  @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
 }
