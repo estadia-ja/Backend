@@ -3,6 +3,7 @@ import { testConnection } from './database.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger.js';
 import userRoutes from './user/routes.js';
+import propertyRoutes from './property/routes.js'
 
 const app = express();
 
@@ -22,5 +23,6 @@ app.get('/test-db', async (req, res) => {
 
 // Rotas da api
 app.use('/user', userRoutes);
+app.use('/property', propertyRoutes)
 
 export { app }; 
