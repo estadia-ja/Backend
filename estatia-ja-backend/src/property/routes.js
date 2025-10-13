@@ -9,6 +9,13 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 /**
  * @swagger
+ * tags:
+ *   name: Imóveis
+ *   description: API para gerenciamento de imóveis
+ */
+
+/**
+ * @swagger
  * /property:
  *   post:
  *     summary: Cria um novo imóvel com seus dados e imagens
@@ -115,5 +122,50 @@ router.post(
     validateCreateProperty,
     propertyController.create
 );
+
+/**
+ * @swagger
+ * /property:
+ *   get:
+ *     summary: Retorna a lista de todos os imóveis
+ *     tags: [Imóveis]
+ *     responses:
+ *       '200':
+ *         description: Lista de imóveis obtida com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Property'
+ *       '500':
+ *         description: Erro interno do servidor.
+ */
+router.get("/", propertyController.getAll);
+
+/**
+ * @swagger
+ * /property/{id}:
+ *   get:
+ *     summary: Retorna um imóvel específico pelo seu ID
+ *     tags: [Imóveis]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID único do imóvel.
+ *     responses:
+ *       '200':
+ *         description: Imóvel encontrado.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Property'
+ *       '404':
+ *         description: Imóvel não encontrado.
+ */
+router.get("/:id", propertyController.getById);
 
 export default router;

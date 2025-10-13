@@ -26,7 +26,33 @@ const propertyService = {
         });
 
         return new Property(newProperty)
-    }
+    },
+
+    async getAllProperties() {
+        const properties = await prisma.property.findMany({
+            include: {
+                images:true
+            }
+        });
+
+        return properties.map(property => new Property(property));
+    },
+
+    async getPropertyByID(id) {
+        const property = await prisma.property.findUnique({
+            where: { id },
+            include: {
+                images: true,
+                user: { select: { id: true, name: true, email: true } }
+            },
+        });
+
+        if(!property){
+            throw new Error("Imóvel não existe")
+        }
+
+        return new Property(property);
+    },
 }
 
 export default propertyService
