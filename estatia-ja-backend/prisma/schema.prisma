@@ -61,7 +61,7 @@ model Property {
 
 model PropertyImage {
   id         String   @id @default(cuid())
-  image      String
+  image      Bytes
   propertyId String
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
