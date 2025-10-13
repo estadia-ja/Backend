@@ -47,12 +47,28 @@ const propertyService = {
             },
         });
 
-        if(!property){
+        if(!property) {
             throw new Error("Imóvel não existe")
         }
 
         return new Property(property);
     },
+
+    async deleleProperty(propertyId, userId) {
+        const property = await prisma.property.findUnique({
+            where: { id: propertyId }
+        });
+
+        if(!property) {
+            throw new Error("Imóvel não existe")
+        }
+        
+        if(property.userId !== userId) {
+            throw new Error("Ação não autorizada")
+        }
+
+        await prisma.property.delete({ where: { id: propertyId } });
+    }
 }
 
 export default propertyService

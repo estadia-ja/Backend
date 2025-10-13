@@ -168,4 +168,30 @@ router.get("/", propertyController.getAll);
  */
 router.get("/:id", propertyController.getById);
 
+/**
+ * @swagger
+ * /property/{id}:
+ *   delete:
+ *     summary: Deleta um imóvel
+ *     tags: [Imóveis]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do imóvel a ser deletado.
+ *     responses:
+ *       '204':
+ *         description: Imóvel deletado com sucesso.
+ *       '403':
+ *         description: Ação não autorizada (usuário não é o proprietário).
+ *       '404':
+ *         description: Imóvel não encontrado.
+ */
+router.delete("/:id", authMiddleware, propertyController.delete);
+
+
 export default router;
