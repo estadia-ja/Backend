@@ -2,30 +2,39 @@ import Property from "./model.js";
 import { prisma } from '../database.js';
 
 const propertyService = {
-    async createProperty(propertyData, imageBuffer, userId) {
+    async createProperty(propertyData, imageBuffers, userId) {
+        // A transação garante que ou tudo é salvo, ou nada é.
         const newProperty = await prisma.$transaction(async (tx) => {
-            const property = await tx.property.create ({
+            // 1. Cria o imóvel para ter um ID
+            const property = await tx.property.create({
                 data: {
                     ...propertyData,
                     userId: userId,
-                }
+                },
             });
-
-            if ( imageBuffer && imageBuffer.lenght > 0){
-                const imagesData = imageBuffer.map(buffer => ({
+    
+            // 2. CORREÇÃO: Usar 'length' em vez de 'lenght'
+            if (imageBuffers && imageBuffers.length > 0) {
+                // Prepara os dados para a criação de múltiplas imagens
+                const imagesData = imageBuffers.map(buffer => ({
                     image: buffer,
-                    propertyId: property.id,
+                    propertyId: property.id, // Associa cada imagem ao ID do imóvel
                 }));
-
+    
+                // 3. Cria todas as imagens de uma vez
                 await tx.propertyImage.createMany({
-                    data:imagesData,
+                    data: imagesData,
                 });
             }
-
-            return property
+    
+            // A transação retorna o imóvel básico que foi criado
+            return property;
         });
-
-        return new Property(newProperty)
+    
+        // 4. MELHOR PRÁTICA: Após a transação ser um sucesso, buscamos o imóvel
+        // completo com suas imagens para retornar uma resposta precisa.
+        const resultWithImages = await this.getPropertyById(newProperty.id);
+        return resultWithImages;
     },
 
     async getAllProperties() {
@@ -38,7 +47,7 @@ const propertyService = {
         return properties.map(property => new Property(property));
     },
 
-    async getPropertyByID(id) {
+    async getPropertyById(id) {
         const property = await prisma.property.findUnique({
             where: { id },
             include: {

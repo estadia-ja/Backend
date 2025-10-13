@@ -27,7 +27,7 @@ const propertyController = {
     async getById(req, res) {
         try {
             const { id } = req.params;
-            const property = await propertyService.getPropertyByID(id);
+            const property = await propertyService.getPropertyById(id);
             res.status(200).json(property.toJSON());
         } catch (error) {
             res.status(404).json({ error: error.message });
