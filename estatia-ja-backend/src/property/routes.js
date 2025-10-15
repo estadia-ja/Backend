@@ -6,6 +6,7 @@ import {
   validateCreateProperty,
   validateUpdateProperty,
 } from '../middlewares/propertyValidation.js';
+import reserveRoutes from '../reserve/routes.js'
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -344,4 +345,6 @@ router.put(
  */
 router.delete('/:id', authMiddleware, propertyController.delete);
 
+
+router.use('/:propertyId/reserve', reserveRoutes);
 export default router;

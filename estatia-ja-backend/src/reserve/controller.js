@@ -1,0 +1,30 @@
+import reserveService from "./service.js";
+
+const reserveController = {
+    async create(req, res){
+        try {
+            const { propertyId } = req.params;
+            const userId = req.user.id;
+            const reserveData = req.validatedData;
+            console.log(propertyId, userId, reserveData)
+            const reserve = await reserveService.createReserve(propertyId, userId, reserveData);
+            res.status(200).json(reserve.toJSON());
+        } catch (error) {
+            if(error.message.includes("O imóvel já está reservado para estas datas. Conflito de disponibilidade.")){
+                return res.status(409).json({ error: error.message });
+            }
+
+            if(error.message.includes("Você não pode reservar seu própio imóvel.")){
+                return res.status(403).json({ error: error.message });
+            }
+
+            if(error.message.includes("Imóvel não existe")){
+                return res.status(404).json({ error: error.message });
+            }
+
+            return res.status(400).json({ error: error.message });
+        }
+    }
+}
+
+export default reserveController

@@ -34,7 +34,8 @@ const options = {
     swaggerDefinition,
     apis: [
       './src/user/routes.js',
-      './src/property/routes.js'
+      './src/property/routes.js',
+      './src/reserve/routes.js'
     ],
   };
 

@@ -5,6 +5,7 @@ import swaggerSpec from './swagger.js';
 import cors from 'cors';
 import userRoutes from './user/routes.js';
 import propertyRoutes from './property/routes.js'
+import reserveRoutes from './reserve/routes.js'
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.get('/test-db', async (req, res) => {
 
 // Rotas da api
 app.use('/user', userRoutes);
-app.use('/property', propertyRoutes)
+app.use('/property', propertyRoutes);
+//app.use('/:propertyId/reserve', reserveRoutes)
 
 export { app }; 
