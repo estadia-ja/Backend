@@ -6,7 +6,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      auth: '/src/user/test',
+      auth: '/src/**/test',
     }
   }
 })
