@@ -33,6 +33,55 @@ const propertyController = {
             res.status(404).json({ error: error.message });
         }
     },
+
+    async getAllImages(req, res){
+        try {
+            const { propertyId } = req.params;
+            const images = await propertyService.getAllImagesForProperty(propertyId);
+            res.status(200).json(images);
+        } catch (error) {
+            res.status(404).json({ error: error.message });
+        }
+    },
+
+    async updateData(req, res){
+        try {
+            const { id } = req.params;
+            const userId = req.user.id;
+            const validatedData = req.body;
+            const updatedProperty = await propertyService.updatePropertyData(id, validatedData, userId);
+            
+            res.status(200).json(updatedProperty.toJSON());
+        } catch (error) {
+            if (error.message.includes("Ação não autorizada")) {
+                return res.status(403).json({ error: error.message });
+            }
+            if (error.message.includes("Imóvel não existe")) {
+                return res.status(404).json({ error: error.message });
+            }
+            res.status(400).json({ error: error.message });
+        }
+    },
+
+    async updateImages(req, res){
+        try {
+            const { id } = req.params;
+            console.log(id)
+            const files = req.files;
+            const imageBuffers = files ? files.map(file => file.buffer) : [];const userId = req.user.id;
+            const updateProperty = await propertyService.updatePropertyImages(id, imageBuffers, userId);
+            res.status(200).json(updateProperty.toJSON());
+        } catch (error) {
+            if(error.message.includes("Ação não autorizada")){
+                return res.status(403).json({ error: error.message });
+            }
+            if(error.message.includes("Imóvel não existe")){
+                return res.status(404).json({ error: error.message });
+            }
+
+            res.status(400).json({ error: error.message });
+        }
+    },
     
     async delete(req, res){
         try {
@@ -47,16 +96,6 @@ const propertyController = {
             res.status(404).json({ error: error.message });
         }
     },
-
-    async getAllImages(req, res){
-        try {
-            const { propertyId } = req.params;
-            const images = await propertyService.getAllImagesForProperty(propertyId);
-            res.status(200).json(images);
-        } catch (error) {
-            res.status(404).json({ error: error.message });
-        }
-    }
 }
 
 export default propertyController;

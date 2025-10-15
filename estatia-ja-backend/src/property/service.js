@@ -76,6 +76,60 @@ const propertyService = {
         return images;
     },
 
+    async updatePropertyData(propertyId, updateData, userId){
+        const property = await prisma.property.findUnique({
+            where: { id: propertyId }
+        });
+
+        if (!property){
+            throw new Error("Imóvel não existe");
+        }
+
+        if (property.userId !== userId){
+            throw new Error("Ação não autorizada");
+        }
+
+        const updateProperty = await prisma.property.update({
+            where: { id: propertyId },
+            data: updateData
+        });
+
+        return this.getPropertyById(updateProperty.id)
+    },
+
+    async updatePropertyImages(propertyId, newImageBuffers, userId){
+        const property = await prisma.property.findUnique({
+            where: { id: propertyId }
+        });
+
+        if(!property){
+            throw new Error("Imóvel não existe");
+        }
+
+        if(property.userId !== userId){
+            throw new Error("Ação não autorizada");
+        }
+
+        await prisma.$transaction(async (tx) => {
+            await tx.propertyImage.deleteMany({
+                where: { propertyId: propertyId },
+            });
+
+            if(newImageBuffers && newImageBuffers.length > 0){
+                const imagesData = newImageBuffers.map(buffer => ({
+                    image: buffer,
+                    propertyId: propertyId,
+                }));
+    
+                await tx.propertyImage.createMany({
+                    data: imagesData,
+                });
+            }
+        });
+
+        return this.getPropertyById(propertyId)
+    },
+
     async deleleProperty(propertyId, userId) {
         const property = await prisma.property.findUnique({
             where: { id: propertyId }

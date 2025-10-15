@@ -207,6 +207,115 @@ router.get("/:propertyId/images", propertyController.getAllImages);
 /**
  * @swagger
  * /property/{id}:
+ *   put:
+ *     summary: Atualiza os dados de um imóvel (sem alterar imagens)
+ *     tags: [Imóveis]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: O ID do imóvel a ser atualizado
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdatePropertyData'
+ *           example:
+ *             type: "Apartamento"
+ *             description: "Casa espaçosa com acesso direto à praia."
+ *             numberOfBedroom: 4
+ *             numberOfSuite: 2
+ *             numberOfGarage: 3
+ *             numberOfRoom: 3
+ *             numberOfBathroom: 5
+ *             outdoorArea: true
+ *             pool: true
+ *             barbecue: true
+ *             street: "Avenida Beira Mar"
+ *             number: 1234
+ *             neighborhood: "Praia do Futuro"
+ *             state: "CE"
+ *             city: "Fortaleza"
+ *             CEP: "60182-000"
+ *             dailyRate: 850.00
+ *     responses:
+ *       '200':
+ *         description: Imóvel atualizado com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Property'
+ *       '400':
+ *         description: Dados inválidos ou requisição mal formada.
+ *       '403':
+ *         description: Ação não autorizada (usuário não é o proprietário).
+ *       '404':
+ *         description: Imóvel não encontrado.
+ */
+router.put(
+    '/:id',
+    authMiddleware,
+    validateUpdateProperty,
+    propertyController.updateData
+);
+
+/**
+ * @swagger
+ * /property/{id}/images:
+ *   put:
+ *     summary: Atualiza (substitui) todas as imagens de um imóvel
+ *     tags: [Imóveis]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: O ID do imóvel para o qual as imagens serão atualizadas
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Array de arquivos de imagem para upload.
+ *     responses:
+ *       '200':
+ *         description: Imagens do imóvel atualizadas com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Property'
+ *       '400':
+ *         description: Nenhuma imagem foi enviada.
+ *       '403':
+ *         description: Ação não autorizada.
+ *       '404':
+ *         description: Imóvel não encontrado.
+ */
+router.put(
+    '/:id/images',
+    authMiddleware,
+    upload.array('images', 10),
+    propertyController.updateImages
+);
+
+/**
+ * @swagger
+ * /property/{id}:
  *   delete:
  *     summary: Deleta um imóvel
  *     tags: [Imóveis]

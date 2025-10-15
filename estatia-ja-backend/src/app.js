@@ -2,11 +2,13 @@ import express from 'express';
 import { testConnection } from './database.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger.js';
+import cors from 'cors';
 import userRoutes from './user/routes.js';
 import propertyRoutes from './property/routes.js'
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 // Swagger
