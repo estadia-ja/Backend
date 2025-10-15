@@ -46,6 +46,24 @@ const reserveController = {
             }
             res.status(400).json({ error: error.message });
         }
+    },
+
+    async cancel(req, res){
+        try {
+            const { reserveId } = req.params;
+            const userId = req.user.id;
+
+            await reserveService.cancelReserve(reserveId, userId);
+            res.status(204).send();
+        } catch (error) {
+            if (error.message.includes("Ação não autorizada")) {
+                return res.status(403).json({ error: error.message });
+            }
+            if (error.message.includes("Reserva não existe")) {
+                return res.status(404).json({ error: error.message });
+            }
+            res.status(400).json({ error: error.message });
+        }
     }
 }
 

@@ -100,6 +100,31 @@ const reserveService = {
         });
 
         return new Reserve(updateReserve)
+    },
+
+    async cancelReserve(reserveId, userId) {
+        const reserve = await prisma.reserve.findUnique({
+            where: { id: reserveId },
+            include: { property: true }
+        });
+
+        if(!reserve){
+            throw new Error("Reserva não existe")
+        }
+
+        if (reserve.userId !== userId && reserve.property.userId !== userId) {
+            throw new Error("Ação não autorizada.");
+        }
+
+        if (new Date(reserve.dateStart) < new Date()) {
+            throw new Error("Não é possível cancelar uma reserva que já começou.");
+        }
+
+        await prisma.reserve.update({
+            where: { id: reserveId },
+            data: { status: "CANCELADO" }
+        })
+
     }
 }
 

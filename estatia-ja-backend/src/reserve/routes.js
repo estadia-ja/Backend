@@ -64,10 +64,10 @@ const router = Router({ mergeParams: true });
  *         description: Conflito de disponibilidade (imóvel já reservado para as datas).
  */
 router.post(
-'/',
-authMiddleware,
-validateCreateReserve, 
-reserveController.create
+    '/',
+    authMiddleware,
+    validateCreateReserve, 
+    reserveController.create
 );
 
 /**
@@ -108,7 +108,39 @@ router.put(
     authMiddleware,
     validateUpdateReserve,
     reserveController.update
-  );
+);
+
+/**
+ * @swagger
+ * /reserve/{reserveId}:
+ *   delete:
+ *     summary: Cancela uma reserva
+ *     tags: [Reservas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: reserveId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: O ID da reserva a ser cancelada.
+ *     responses:
+ *       '204':
+ *         description: Reserva cancelada com sucesso.
+ *       '400':
+ *         description: "Não é possível cancelar uma reserva que já começou."
+ *       '403':
+ *         description: "Ação não autorizada."
+ *       '404':
+ *         description: "Reserva não encontrada."
+ */
+router.delete(
+    '/:reserveId',
+    authMiddleware,
+    reserveController.cancel
+);
+  
   
 
 export default router;
