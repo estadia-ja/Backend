@@ -2,7 +2,10 @@ import { Router } from 'express';
 import multer from 'multer';
 import propertyController from './controller.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
-import { validateCreateProperty, validateUpdateProperty } from '../middlewares/propertyValidation.js';
+import {
+  validateCreateProperty,
+  validateUpdateProperty,
+} from '../middlewares/propertyValidation.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -111,16 +114,40 @@ const upload = multer({ storage: multer.memoryStorage() });
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Property'
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 type:
+ *                   type: string
+ *                 description:
+ *                   type: string
+ *                 dailyRate:
+ *                   type: number
+ *                   format: float
+ *                 images:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     name:
+ *                       type: string
  *       '400':
  *         description: Erro de validação nos dados enviados.
  */
 router.post(
-    "/",
-    authMiddleware,
-    upload.array('images', 5),
-    validateCreateProperty,
-    propertyController.create
+  '/',
+  authMiddleware,
+  upload.array('images', 5),
+  validateCreateProperty,
+  propertyController.create
 );
 
 /**
@@ -137,11 +164,35 @@ router.post(
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Property'
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   type:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   dailyRate:
+ *                     type: number
+ *                     format: float
+ *                   images:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                   user:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       name:
+ *                         type: string
  *       '500':
  *         description: Erro interno do servidor.
  */
-router.get("/", propertyController.getAll);
+router.get('/', propertyController.getAll);
 
 /**
  * @swagger
@@ -159,14 +210,10 @@ router.get("/", propertyController.getAll);
  *     responses:
  *       '200':
  *         description: Imóvel encontrado.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Property'
  *       '404':
  *         description: Imóvel não encontrado.
  */
-router.get("/:id", propertyController.getById);
+router.get('/:id', propertyController.getById);
 
 /**
  * @swagger
@@ -184,25 +231,10 @@ router.get("/:id", propertyController.getById);
  *     responses:
  *       '200':
  *         description: Uma lista de objetos de imagem.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                   image:
- *                     type: string
- *                     format: byte
- *                     description: Os dados binários da imagem.
- *                   propertyId:
- *                     type: string
  *       '404':
  *         description: Imóvel ou imagens não encontradas.
  */
-router.get("/:propertyId/images", propertyController.getAllImages);
+router.get('/:propertyId/images', propertyController.getAllImages);
 
 /**
  * @swagger
@@ -224,44 +256,22 @@ router.get("/:propertyId/images", propertyController.getAllImages);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UpdatePropertyData'
- *           example:
- *             type: "Apartamento"
- *             description: "Casa espaçosa com acesso direto à praia."
- *             numberOfBedroom: 4
- *             numberOfSuite: 2
- *             numberOfGarage: 3
- *             numberOfRoom: 3
- *             numberOfBathroom: 5
- *             outdoorArea: true
- *             pool: true
- *             barbecue: true
- *             street: "Avenida Beira Mar"
- *             number: 1234
- *             neighborhood: "Praia do Futuro"
- *             state: "CE"
- *             city: "Fortaleza"
- *             CEP: "60182-000"
- *             dailyRate: 850.00
+ *             type: object
  *     responses:
  *       '200':
  *         description: Imóvel atualizado com sucesso.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Property'
  *       '400':
- *         description: Dados inválidos ou requisição mal formada.
+ *         description: Dados inválidos.
  *       '403':
- *         description: Ação não autorizada (usuário não é o proprietário).
+ *         description: Ação não autorizada.
  *       '404':
  *         description: Imóvel não encontrado.
  */
 router.put(
-    '/:id',
-    authMiddleware,
-    validateUpdateProperty,
-    propertyController.updateData
+  '/:id',
+  authMiddleware,
+  validateUpdateProperty,
+  propertyController.updateData
 );
 
 /**
@@ -295,10 +305,6 @@ router.put(
  *     responses:
  *       '200':
  *         description: Imagens do imóvel atualizadas com sucesso.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Property'
  *       '400':
  *         description: Nenhuma imagem foi enviada.
  *       '403':
@@ -307,10 +313,10 @@ router.put(
  *         description: Imóvel não encontrado.
  */
 router.put(
-    '/:id/images',
-    authMiddleware,
-    upload.array('images', 10),
-    propertyController.updateImages
+  '/:id/images',
+  authMiddleware,
+  upload.array('images', 10),
+  propertyController.updateImages
 );
 
 /**
@@ -332,10 +338,10 @@ router.put(
  *       '204':
  *         description: Imóvel deletado com sucesso.
  *       '403':
- *         description: Ação não autorizada (usuário não é o proprietário).
+ *         description: Ação não autorizada.
  *       '404':
  *         description: Imóvel não encontrado.
  */
-router.delete("/:id", authMiddleware, propertyController.delete);
+router.delete('/:id', authMiddleware, propertyController.delete);
 
 export default router;
