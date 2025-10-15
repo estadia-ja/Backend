@@ -27,6 +27,6 @@ app.get('/test-db', async (req, res) => {
 // Rotas da api
 app.use('/user', userRoutes);
 app.use('/property', propertyRoutes);
-//app.use('/:propertyId/reserve', reserveRoutes)
+app.use('/reserve', reserveRoutes);
 
 export { app }; 

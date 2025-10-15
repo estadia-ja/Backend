@@ -18,7 +18,7 @@ const reserveService = {
             throw new Error("Imóvel não existe");
         }
 
-        if(propertyId.userId === userId){
+        if(property.userId === userId){
             throw new Error("Você não pode reservar seu própio imóvel.");
         }
 
@@ -52,6 +52,54 @@ const reserveService = {
         });
 
         return new Reserve(newReserve)
+    },
+
+    async updateReserve(reserveId, userId, updateData){
+        const reserve = await prisma.reserve.findUnique({
+            where: { id: reserveId }
+        });
+
+        if(!reserve){
+            throw new Error("Reserva não existe");
+        }
+
+        if(reserve.userId !== userId){
+            throw new Error("Ação não autorizada, a reserva não é sua")
+        }
+
+        if(new Date(reserve.dateStart) < new Date()){
+            throw new Error("A data de início não pode ser no passado.");
+        }
+
+        const newDateStart = updateData.dateStart || reserve.dateStart;
+        const newDateEnd = updateData.dateEnd || reserve.dateEnd;
+
+        const existingReserve = await prisma.reserve.findFirst({
+            where: {
+                propertyId: reserve.propertyId,
+                id: { not: reserveId },
+                status: { not: 'CANCELADA' },
+                AND: [
+                    { dateStart: { lt: newDateEnd } },
+                    { dateEnd: { gt: newDateStart } }
+                ]
+            }
+        });
+
+        if(existingReserve){
+            throw new Error("O imóvel já está reservado para estas datas")
+        }
+
+        const updateReserve = await prisma.reserve.update({
+            where: { id: reserveId },
+            data: {
+                dateStart: newDateStart,
+                dateEnd: newDateEnd
+            },
+            include: { property: true, user: true }
+        });
+
+        return new Reserve(updateReserve)
     }
 }
 

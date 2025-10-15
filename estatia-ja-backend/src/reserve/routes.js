@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import reserveController from './controller.js';
 import { authMiddleware} from '../middlewares/authMiddleware.js'
-import { validateCreateReserve } from '../middlewares/reserveValidation.js'
+import { validateCreateReserve, validateUpdateReserve } from '../middlewares/reserveValidation.js'
 
 const router = Router({ mergeParams: true });
 
@@ -69,6 +69,47 @@ authMiddleware,
 validateCreateReserve, 
 reserveController.create
 );
+
+/**
+ * @swagger
+ * /reserve/{reserveId}:
+ *   put:
+ *     summary: Atualiza as datas de uma reserva existente
+ *     tags: [Reservas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: reserveId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: O ID da reserva a ser atualizada.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateReserveData'
+ *     responses:
+ *       '200':
+ *         description: Reserva atualizada com sucesso.
+ *       '400':
+ *         description: "Dados inválidos ou reserva já iniciada."
+ *       '403':
+ *         description: "Ação não autorizada."
+ *       '404':
+ *         description: "Reserva não encontrada."
+ *       '409':
+ *         description: "Conflito de disponibilidade para as novas datas."
+ */
+router.put(
+    '/:reserveId',
+    authMiddleware,
+    validateUpdateReserve,
+    reserveController.update
+  );
+  
 
 export default router;
   

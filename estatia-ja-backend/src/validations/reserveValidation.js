@@ -10,3 +10,15 @@ export const createReserveSchema = Joi.object({
     'date.format': 'O campo {#label} deve estar no formato ISO 8601 (ex: 2025-12-20T14:00:00Z).',
     'date.greater': 'O campo {#label} deve ser posterior à {#limit.root}.'
 });
+
+export const updateReserveSchema = Joi.object({
+    dateStart: Joi.date().iso(),
+    dateEnd: Joi.date().iso().greater(Joi.ref('dateStart'))
+})
+.or('dateStart', 'dateEnd')
+.messages({
+    'date.base': 'O campo {#label} deve ser uma data válida.',
+    'date.format': 'O campo {#label} deve estar no formato ISO 8601.',
+    'date.greater': 'O campo {#label} deve ser posterior à {#limit.root}.',
+    'object.missing': 'Pelo menos uma data (dateStart ou dateEnd) deve ser fornecida para a atualização.'
+});
