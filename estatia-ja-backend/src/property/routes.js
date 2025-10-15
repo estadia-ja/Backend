@@ -170,6 +170,42 @@ router.get("/:id", propertyController.getById);
 
 /**
  * @swagger
+ * /property/{propertyId}/images:
+ *   get:
+ *     summary: Retorna todas as imagens de um imóvel específico
+ *     tags: [Imóveis]
+ *     parameters:
+ *       - in: path
+ *         name: propertyId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: O ID do imóvel para o qual buscar as imagens.
+ *     responses:
+ *       '200':
+ *         description: Uma lista de objetos de imagem.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   image:
+ *                     type: string
+ *                     format: byte
+ *                     description: Os dados binários da imagem.
+ *                   propertyId:
+ *                     type: string
+ *       '404':
+ *         description: Imóvel ou imagens não encontradas.
+ */
+router.get("/:propertyId/images", propertyController.getAllImages);
+
+/**
+ * @swagger
  * /property/{id}:
  *   delete:
  *     summary: Deleta um imóvel
@@ -192,6 +228,5 @@ router.get("/:id", propertyController.getById);
  *         description: Imóvel não encontrado.
  */
 router.delete("/:id", authMiddleware, propertyController.delete);
-
 
 export default router;

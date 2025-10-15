@@ -152,7 +152,6 @@ const userService = {
         return new User(user);
     },
     
-
     async getImage(id) {
         const user = await prisma.user.findUnique({
             where: { id: id },

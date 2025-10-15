@@ -3,9 +3,7 @@ import { prisma } from '../database.js';
 
 const propertyService = {
     async createProperty(propertyData, imageBuffers, userId) {
-        // A transação garante que ou tudo é salvo, ou nada é.
         const newProperty = await prisma.$transaction(async (tx) => {
-            // 1. Cria o imóvel para ter um ID
             const property = await tx.property.create({
                 data: {
                     ...propertyData,
@@ -13,26 +11,20 @@ const propertyService = {
                 },
             });
     
-            // 2. CORREÇÃO: Usar 'length' em vez de 'lenght'
             if (imageBuffers && imageBuffers.length > 0) {
-                // Prepara os dados para a criação de múltiplas imagens
                 const imagesData = imageBuffers.map(buffer => ({
                     image: buffer,
-                    propertyId: property.id, // Associa cada imagem ao ID do imóvel
+                    propertyId: property.id,
                 }));
     
-                // 3. Cria todas as imagens de uma vez
                 await tx.propertyImage.createMany({
                     data: imagesData,
                 });
             }
     
-            // A transação retorna o imóvel básico que foi criado
             return property;
         });
     
-        // 4. MELHOR PRÁTICA: Após a transação ser um sucesso, buscamos o imóvel
-        // completo com suas imagens para retornar uma resposta precisa.
         const resultWithImages = await this.getPropertyById(newProperty.id);
         return resultWithImages;
     },
@@ -57,10 +49,31 @@ const propertyService = {
         });
 
         if(!property) {
-            throw new Error("Imóvel não existe")
+            throw new Error('Imóvel não existe')
         }
 
         return new Property(property);
+    },
+
+    async getAllImagesForProperty(id){
+        const propertyExists = await prisma.property.findUnique({
+            where: { id: id },
+            select: { id: true }
+        });
+
+        if(!propertyExists) {
+            throw new Error("Imóvel não existe")
+        }
+
+        const images = await prisma.propertyImage.findMany({
+            where: { propertyId: id }
+        });
+
+        if(!images || images.length === 0) {
+            throw new Error("Imóvel sem imagem");
+        }
+
+        return images;
     },
 
     async deleleProperty(propertyId, userId) {

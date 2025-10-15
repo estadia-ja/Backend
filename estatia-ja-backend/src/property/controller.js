@@ -46,6 +46,16 @@ const propertyController = {
             }
             res.status(404).json({ error: error.message });
         }
+    },
+
+    async getAllImages(req, res){
+        try {
+            const { propertyId } = req.params;
+            const images = await propertyService.getAllImagesForProperty(propertyId);
+            res.status(200).json(images);
+        } catch (error) {
+            res.status(404).json({ error: error.message });
+        }
     }
 }
 
