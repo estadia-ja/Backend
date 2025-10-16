@@ -54,6 +54,40 @@ const reserveService = {
         return new Reserve(newReserve)
     },
 
+    async getReservationsForOwner(ownerId){
+        const reservations = await prisma.reserve.findMany({
+            where: {
+                property: {
+                    userId: ownerId
+                }
+            },
+            include: {
+                property: true,
+                user:true,
+            },
+            orderBy: {
+                dateStart: 'asc'
+            }
+        });
+        return reservations.map(r => new Reserve(r));
+    },
+
+    async getReservationsForUser(userId){
+        const reservations = await prisma.reserve.findMany({
+            where: {
+                userId: userId 
+            },
+            include: {
+                property: true
+            },
+            orderBy: {
+                dateStart: 'asc'
+            }
+        });
+
+        return reservations.map(r => new Reserve(r));
+    },
+
     async updateReserve(reserveId, userId, updateData){
         const reserve = await prisma.reserve.findUnique({
             where: { id: reserveId }

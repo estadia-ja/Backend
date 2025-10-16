@@ -72,6 +72,60 @@ router.post(
 
 /**
  * @swagger
+ * /reserve/owner:
+ *   get:
+ *     summary: Retorna todas as reservas feitas nos imóveis do proprietário logado
+ *     tags: [Reservas]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: Uma lista de reservas nos imóveis do proprietário.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Reserve'
+ *       '401':
+ *         description: Não autorizado.
+ *       '403':
+ *         description: Acesso proibido.
+ */
+router.get(
+    '/owner',
+    authMiddleware,
+    reserveController.getOwnerReservations
+);  
+
+/**
+ * @swagger
+ * /reserve/my-reservations:
+ *   get:
+ *     summary: (Hóspede) Retorna as reservas que você fez
+ *     tags: [Reservas]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: Uma lista com as suas reservas.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Reserve'
+ *       '401':
+ *         description: Não autorizado.
+ */
+router.get(
+    '/my-reservations',
+    authMiddleware,
+    reserveController.getUserReservations
+);
+  
+/**
+ * @swagger
  * /reserve/{reserveId}:
  *   put:
  *     summary: Atualiza as datas de uma reserva existente
@@ -140,8 +194,6 @@ router.delete(
     authMiddleware,
     reserveController.cancel
 );
-  
-  
 
 export default router;
   
