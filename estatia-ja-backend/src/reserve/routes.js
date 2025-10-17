@@ -2,6 +2,7 @@ import { Router } from 'express';
 import reserveController from './controller.js';
 import { authMiddleware} from '../middlewares/authMiddleware.js'
 import { validateCreateReserve, validateUpdateReserve } from '../middlewares/reserveValidation.js'
+import propertyValuationRoutes from '../propertyValuation/routes.js';
 
 const router = Router({ mergeParams: true });
 
@@ -194,6 +195,8 @@ router.delete(
     authMiddleware,
     reserveController.cancel
 );
+
+router.use('/:reserveId/property-valuation', propertyValuationRoutes);
 
 export default router;
   
