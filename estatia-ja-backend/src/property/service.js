@@ -1,5 +1,6 @@
 import Property from "./model.js";
 import { prisma } from '../database.js';
+import { Prisma } from '@prisma/client';
 
 const propertyService = {
     async createProperty(propertyData, imageBuffers, userId) {
@@ -99,6 +100,28 @@ const propertyService = {
         });
 
         return availableProperties.map(property => new Property(property));
+    },
+
+    async findPropertiesRankedByValuation() {
+        const rankedProperties = await prisma.$queryRaw(
+            Prisma.sql`
+                SELECT
+                    p.*,
+                    AVG(pv."noteProperty") as "avgRating"
+                FROM
+                    "properties" AS p
+                INNER JOIN
+                    "reserves" AS r ON p.id = r."propertyId"
+                INNER JOIN
+                    "property_valuations" AS pv ON r.id = pv."reserveId"
+                GROUP BY
+                    p.id
+                ORDER BY
+                    "avgRating" DESC
+            `
+        );
+
+        return rankedProperties.map(property => new Property(property))
     },
 
     async updatePropertyData(propertyId, updateData, userId){

@@ -233,6 +233,26 @@ router.get('/available', propertyController.findAvailable);
 
 /**
  * @swagger
+ * /property/ranked-by-valuation:
+ *   get:
+ *     summary: Retorna um ranking de imóveis pela média de suas avaliações
+ *     tags: [Imóveis, Avaliações]
+ *     responses:
+ *       '200':
+ *         description: Lista de imóveis ordenada da maior para a menor média de avaliação.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/PropertyWithRating' # Schema customizado
+ *       '500':
+ *         description: Erro interno do servidor.
+ */
+router.get('/ranked-by-valuation', propertyController.findRanked);
+
+/**
+ * @swagger
  * /property/{id}:
  *   get:
  *     summary: Retorna um imóvel específico pelo seu ID

@@ -54,6 +54,16 @@ const propertyController = {
         }
     },
 
+    async findRanked(req, res) {
+        try {
+            const properties = await propertyService.findPropertiesRankedByValuation();
+            res.status(200).json(properties.map(property => property.toJSON()));
+        } catch (error) {
+            console.error("Erro ao buscar ranking de imóveis:", error);
+            res.status(500).json({ error: "Erro ao processar a busca por ranking." });
+        }
+    },
+
     async updateData(req, res){
         try {
             const { id } = req.params;

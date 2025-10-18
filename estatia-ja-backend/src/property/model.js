@@ -23,6 +23,10 @@ class Property {
         if(data.user) {
             this.user = data.user;
         }
+
+        if (data.avgRating !== undefined) {
+            this.avgRating = data.avgRating;
+        }
     }
 
     toJSON() {
