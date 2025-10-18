@@ -380,6 +380,5 @@ router.put(
  */
 router.delete('/:id', authMiddleware, propertyController.delete);
 
-
 router.use('/:propertyId/reserve', reserveRoutes);
 export default router;

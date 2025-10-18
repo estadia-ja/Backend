@@ -4,8 +4,9 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger.js';
 import cors from 'cors';
 import userRoutes from './user/routes.js';
-import propertyRoutes from './property/routes.js'
-import reserveRoutes from './reserve/routes.js'
+import propertyRoutes from './property/routes.js';
+import reserveRoutes from './reserve/routes.js';
+import propertyValuationRoutes from './propertyValuation/routes.js'
 
 const app = express();
 
@@ -28,5 +29,6 @@ app.get('/test-db', async (req, res) => {
 app.use('/user', userRoutes);
 app.use('/property', propertyRoutes);
 app.use('/reserve', reserveRoutes);
+app.use('/property-valuation', propertyValuationRoutes);
 
 export { app }; 

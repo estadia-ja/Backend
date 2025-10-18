@@ -11,7 +11,7 @@ const propertyValuationService = {
         });
 
         if(!reserve) {
-            throw new Error("Reserva não Encontrada.");
+            throw new Error("Reserva não encontrada.");
         }
 
         if(reserve.userId !== userId) {
@@ -35,7 +35,28 @@ const propertyValuationService = {
         });
 
         return new PropertyValuation(newValuation);
-    }
+    },
+
+    async deletePropertyValuation(valuationId, userId){
+        const valuation = await prisma.propertyValuation.findUnique({
+            where: { id: valuationId },
+            include: {
+                reserve: true
+            }
+        });
+
+        if(!valuation) {
+            throw new Error("AValiação não existe.");
+        }
+
+        if(valuation.reserve.userId !== userId){
+            throw new Error("Ação não autorizada. Vacê não pode deletar uma avaliação que não é sua.");
+        }
+
+        await prisma.propertyValuation.delete({
+            where: { id: valuationId }
+        });
+    },
 }
 
 export default propertyValuationService;

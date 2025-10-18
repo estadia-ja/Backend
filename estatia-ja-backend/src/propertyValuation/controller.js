@@ -11,18 +11,35 @@ const propertyValuationController = {
 
             res.status(201).json(valuation.toJson());
         } catch (error) {
-            if (error.message.includes("já foi avaliada")) {
+            if (error.message.includes("Esta reserva já foi avalia.")) {
                 return res.status(409).json({ error: error.message });
             }
-            if (error.message.includes("Ação não autorizada")) {
+            if (error.message.includes("Ação não autorizada. Você não pode avaliar uma reserva que não é sua.")) {
                 return res.status(403).json({ error: error.message });n
             }
-            if (error.message.includes("não encontrada")) {
+            if (error.message.includes("Reserva não encontrada.")) {
                 return res.status(404).json({ error: error.message }); 
             }
             res.status(400).json({ error: error.message });
         }
-    }
+    },
+
+    async delete(req, res) {
+        try {
+            const {valuationId } = req.params;
+            const userId = req.user.id;
+            await propertyValuationService.deletePropertyValuation(valuationId, userId);
+            res.status(204).send();
+        } catch (error) {
+            if (error.message.includes("Ação não autorizada. Vacê não pode deletar uma avaliação que não é sua.")) {
+                return res.status(403).json({ error: error.message });
+            }
+            if (error.message.includes("Reserva não encontrada.")) {
+                return res.status(404).json({ error: error.message });
+            }
+            res.status(400).json({ error: error.message });
+        }
+    },
 }
 
 export default propertyValuationController;

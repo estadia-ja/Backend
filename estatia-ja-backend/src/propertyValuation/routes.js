@@ -56,4 +56,33 @@ router.post(
   propertyValuationController.create
 );
 
+/**
+ * @swagger
+ * /property-valuation/{valuationId}:
+ *   delete:
+ *     summary: (Hóspede) Deleta uma avaliação de imóvel que você fez
+ *     tags: [Avaliações]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: valuationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: O ID da avaliação a ser deletada.
+ *     responses:
+ *       '204':
+ *         description: Avaliação deletada com sucesso.
+ *       '403':
+ *         description: "Ação não autorizada (avaliação não pertence ao usuário)."
+ *       '404':
+ *         description: "Avaliação não encontrada."
+ */
+router.delete(
+  '/:valuationId',
+  authMiddleware,
+  propertyValuationController.delete
+);
+
 export default router;
