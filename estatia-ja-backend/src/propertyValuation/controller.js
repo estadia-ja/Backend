@@ -24,6 +24,19 @@ const propertyValuationController = {
         }
     },
 
+    async getByProperty(req, res) {
+        try {
+            const { propertyId } = req.params;
+            const valuationProperty = await propertyValuationService.getValuationsByProperty(propertyId);
+            res.status(200).json(valuationProperty.map(valuation => valuation.toJson()));
+        } catch (error) {
+            if (error.message.includes("Nenhuma avaliação encontrada para este imóvel")) {
+                return res.status(404).json({ error: error.message });
+            }
+            res.status(500).json({ error: "Erro ao buscar avaliações." });
+        }
+    },
+
     async delete(req, res) {
         try {
             const {valuationId } = req.params;

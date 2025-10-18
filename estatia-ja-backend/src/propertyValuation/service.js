@@ -37,6 +37,39 @@ const propertyValuationService = {
         return new PropertyValuation(newValuation);
     },
 
+    async getValuationsByProperty(propertyId){
+        const valuations = await prisma.propertyValuation.findMany({
+            where: {
+                reserve: {
+                    propertyId: propertyId 
+                }
+            },
+            include: {
+                reserve: {
+                    select: {
+                        user: {
+                            select: { id: true, name: true}
+                        }
+                    }
+                }
+            },
+            orderBy: {
+                noteProperty: 'desc'
+            }
+        });
+
+        if(!valuations || valuations.length === 0) {
+            throw new Error("Nenhuma avaliação encontrada para este imóvel")
+        }
+
+        const formattedValuations = valuations.map(valuation => ({
+            ...valuation,
+            userBame: valuation.reserve.user.name
+        }));
+
+        return formattedValuations.map(valuation => new PropertyValuation(valuation))
+    },
+
     async deletePropertyValuation(valuationId, userId){
         const valuation = await prisma.propertyValuation.findUnique({
             where: { id: valuationId },

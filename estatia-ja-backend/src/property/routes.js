@@ -6,7 +6,8 @@ import {
   validateCreateProperty,
   validateUpdateProperty,
 } from '../middlewares/propertyValidation.js';
-import reserveRoutes from '../reserve/routes.js'
+import reserveRoutes from '../reserve/routes.js';
+import propertyValuationController from '../propertyValuation/controller.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -250,6 +251,36 @@ router.get('/available', propertyController.findAvailable);
  *         description: Imóvel não encontrado.
  */
 router.get('/:id', propertyController.getById);
+
+/**
+ * @swagger
+ * /property/{propertyId}/valuations:
+ *   get:
+ *     summary: Retorna todas as avaliações de um imóvel específico
+ *     tags: [Imóveis, Avaliações]
+ *     parameters:
+ *       - in: path
+ *         name: propertyId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: O ID do imóvel para buscar as avaliações.
+ *     responses:
+ *       '200':
+ *         description: Uma lista de avaliações, da maior para a menor nota.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/PropertyValuation'
+ *       '404':
+ *         description: Nenhuma avaliação encontrada para este imóvel.
+ */
+router.get(
+  '/:propertyId/valuations',
+  propertyValuationController.getByProperty
+);
 
 /**
  * @swagger
