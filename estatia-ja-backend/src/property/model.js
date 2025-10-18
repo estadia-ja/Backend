@@ -24,8 +24,10 @@ class Property {
             this.user = data.user;
         }
 
-        if (data.avgRating !== undefined) {
-            this.avgRating = data.avgRating;
+        if (data.avgRating !== null && data.avgRating !== undefined) {
+            this.avgRating = parseFloat(data.avgRating.toFixed(2));
+        } else {
+            this.avgRating = null; 
         }
     }
 

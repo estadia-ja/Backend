@@ -53,6 +53,21 @@ const propertyService = {
             throw new Error('Imóvel não existe')
         }
 
+        const ratingAggregation = await prisma.propertyValuation.aggregate({
+            _avg: {
+                noteProperty: true,
+            },
+            where: {
+                reserve: {
+                    propertyId: id,
+                },
+            },
+        });
+
+        const avgRating = ratingAggregation._avg.noteProperty;
+        
+        property.avgRating = avgRating;
+
         return new Property(property);
     },
 

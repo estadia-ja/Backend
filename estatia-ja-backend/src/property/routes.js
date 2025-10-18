@@ -255,7 +255,7 @@ router.get('/ranked-by-valuation', propertyController.findRanked);
  * @swagger
  * /property/{id}:
  *   get:
- *     summary: Retorna um imóvel específico pelo seu ID
+ *     summary: Retorna um imóvel específico pelo seu ID, incluindo sua avaliação média
  *     tags: [Imóveis]
  *     parameters:
  *       - in: path
@@ -267,10 +267,14 @@ router.get('/ranked-by-valuation', propertyController.findRanked);
  *     responses:
  *       '200':
  *         description: Imóvel encontrado.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PropertyWithRating' # ✅ Atualizado
  *       '404':
  *         description: Imóvel não encontrado.
  */
-router.get('/:id', propertyController.getById);
+router.get("/:id", propertyController.getById);
 
 /**
  * @swagger
