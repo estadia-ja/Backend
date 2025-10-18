@@ -44,6 +44,16 @@ const propertyController = {
         }
     },
 
+    async findAvailable(req, res){
+        try {
+            const { dateStart, dateEnd } = req.query;
+            const properties = await propertyService.findAvailableProperties(dateStart, dateEnd);
+            res.status(200).json(properties.map(property => property.toJSON()));
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    },
+
     async updateData(req, res){
         try {
             const { id } = req.params;

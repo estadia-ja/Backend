@@ -197,6 +197,41 @@ router.get('/', propertyController.getAll);
 
 /**
  * @swagger
+ * /property/available:
+ *   get:
+ *     summary: Busca imóveis disponíveis por período
+ *     tags: [Imóveis]
+ *     parameters:
+ *       - in: query
+ *         name: dateStart
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: "Data de início da busca (formato ISO 8601: 2025-12-20T14:00:00Z)"
+ *       - in: query
+ *         name: dateEnd
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: "Data final da busca (formato ISO 8601: 2025-12-27T11:00:00Z)"
+ *     responses:
+ *       '200':
+ *         description: Lista de imóveis disponíveis no período.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Property'
+ *       '400':
+ *         description: Datas de busca não fornecidas ou inválidas.
+ */
+router.get('/available', propertyController.findAvailable);
+
+/**
+ * @swagger
  * /property/{id}:
  *   get:
  *     summary: Retorna um imóvel específico pelo seu ID

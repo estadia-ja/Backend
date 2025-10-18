@@ -76,6 +76,31 @@ const propertyService = {
         return images;
     },
 
+    async findAvailableProperties(dateStart, dateEnd) {
+        if( !dateStart || !dateEnd ){
+            throw new Error("as datas de início e fim são obrigatórias.");
+        }
+
+        const availableProperties = await prisma.property.findMany({
+            where: {
+                reserves:{
+                    none: {
+                        status: { not: 'CANCELADA'},
+                        AND: [
+                            { dateStart: { lt: new Date(dateEnd) }},
+                            { dateEnd: { gt: new Date(dateStart) }}
+                        ]
+                    }
+                }
+            },
+            include: {
+                images: true
+            }
+        });
+
+        return availableProperties.map(property => new Property(property));
+    },
+
     async updatePropertyData(propertyId, updateData, userId){
         const property = await prisma.property.findUnique({
             where: { id: propertyId }
