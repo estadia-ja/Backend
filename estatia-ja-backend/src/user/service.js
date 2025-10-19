@@ -90,6 +90,20 @@ const userService = {
             throw new Error('Usuário não encontrado');
         }
 
+        const ratingAggregation = await prisma.clientValuation.aggregate({
+            _avg: {
+                noteClient: true,
+            },
+            where: {
+                reserve: {
+                    userId: id,
+                },
+            },
+        });
+
+        const avgRating = ratingAggregation._avg.noteClient;
+        user.avgRating = avgRating;
+
         return new User(user);
     },
 
