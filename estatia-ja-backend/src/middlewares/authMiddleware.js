@@ -1,7 +1,7 @@
 export const authMiddleware = (req, res, next) => {
-    const USER_ID = 'cmgwbxlnk0001ox60m034es4w'
+    const USER_ID = 'cmgp2h7j30001l65vk6uuak4j'
 
-    if(USER_ID === 'cmgwbxlnk0001ox60m034es4w'){
+    if(USER_ID === 'cmgp2h7j30001l65vk6uuak4j'){
         console.log('autenticado');
     }
 

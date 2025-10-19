@@ -36,7 +36,8 @@ const options = {
         './src/user/routes.js',
         './src/property/routes.js',
         './src/reserve/routes.js',
-        './src/propertyValuation/routes.js'
+        './src/propertyValuation/routes.js',
+        './src/clientValuation/routes.js'
     ],
   };
 

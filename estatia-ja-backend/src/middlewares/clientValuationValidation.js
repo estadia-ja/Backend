@@ -1,7 +1,7 @@
-import { createClientValuationShema } from "../validations/clientValuationValidation";
+import { createClientValuationSchema } from "../validations/clientValuationValidation.js";
 
-export const validateCreateCLientValuation = (req, res, next) => {
-    const { error, value } = createClientValuationShema.validate.apply(req.body);
+export const validateCreateClientValuation = (req, res, next) => {
+    const { error, value } = createClientValuationSchema.validate(req.body);
 
     if(error){
         return res. status(400).json({ error: error.details[0].message });
