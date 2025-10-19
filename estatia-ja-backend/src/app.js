@@ -7,6 +7,7 @@ import userRoutes from './user/routes.js';
 import propertyRoutes from './property/routes.js';
 import reserveRoutes from './reserve/routes.js';
 import propertyValuationRoutes from './propertyValuation/routes.js'
+import clientValuationRoutes from './clientValuation/routes.js';
 
 const app = express();
 
@@ -30,5 +31,5 @@ app.use('/user', userRoutes);
 app.use('/property', propertyRoutes);
 app.use('/reserve', reserveRoutes);
 app.use('/property-valuation', propertyValuationRoutes);
-
+app.use('/client-valuation', clientValuationRoutes);
 export { app }; 

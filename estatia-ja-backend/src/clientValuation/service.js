@@ -33,6 +33,25 @@ const clientValuationService = {
         });
 
         return new ClientValuation(newClientValuation);
+    },
+    
+    async deleteClientValuation(valuationId, ownerId){
+        const valuation = await prisma.clientValuation.findUnique({
+            where: { id: valuationId },
+            include: { reserve: { include: {property: true } } }
+        });
+
+        if(!valuation){
+            throw new Error("Avaliação não existe.");
+        }
+
+        if(valuation.reserve.property.userId !== ownerId){
+            throw new Error("Ação não autorizada. Você não pode deletar esta avaliação.");
+        }
+
+        await prisma.clientValuation.delete({
+            where:{ id: valuationId }
+        });
     }
 }
 
