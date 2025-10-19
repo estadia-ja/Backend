@@ -100,6 +100,36 @@ router.get("/:id", userController.getById);
 
 /**
  * @swagger
+ * /user/{id}/client-valuations:
+ *   get:
+ *     summary: Retorna todas as avaliações que um usuário recebeu como hóspede
+ *     tags: [Usuários, Avaliações]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: O ID do usuário para buscar as avaliações.
+ *     responses:
+ *       '200':
+ *         description: Uma lista de avaliações recebidas pelo usuário.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ClientValuation'
+ *       '404':
+ *         description: Usuário não encontrado.
+ */
+router.get(
+    '/:id/client-valuations',
+    userController.getClientValuations
+);
+  
+/**
+ * @swagger
  * /user/{id}:
  *   put:
  *     summary: Atualiza um usuário pelo ID

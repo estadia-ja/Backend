@@ -107,6 +107,44 @@ const userService = {
         return new User(user);
     },
 
+    async getClientValuationsForUser(userId) {
+        const userExists = await prisma.user.findUnique({
+            where: { id: userId }
+        });
+
+        if(!userExists){
+            throw new Error("Usuário não existe");
+        }
+
+        const valuations = await prisma.clientValuation.findMany({
+            where: {
+                reserve: {
+                    userId: userId
+                }
+            },
+            include: {
+                reserve: {
+                    include: {
+                        property: {
+                            select: {
+                                id: true,
+                                type: true,
+                                user: { 
+                                    select: { id: true, name: true }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: {
+                dateClientValuation: 'desc'
+            }
+        });
+
+        return valuations;
+    },
+
     async updateUser(id, userData){
         const {phones, ...userOnlyData} = userData
         const existingUser = await prisma.user.findUnique({ where: {id: id}});

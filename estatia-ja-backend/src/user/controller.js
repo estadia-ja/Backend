@@ -29,6 +29,19 @@ const userController = {
         }
     },
 
+    async getClientValuations(req, res) {
+        try {
+            const { id } = req.params;
+            const valuations = await userService.getClientValuationsForUser(id);
+            res.status(200).json(valuations);
+        } catch (error) {
+            if (error.message.includes('Usuário não existe.')) {
+                return res.status(404).json({ error: error.message });
+            }
+            res.status(500).json({ error: "Erro ao buscar as avaliações do usuário." });
+        }
+    },
+
     async update(req, res) {
         try {
             const idUser = req.params.id
