@@ -17,7 +17,17 @@ class User {
     }
     
     toJSON() {
-        return this;
+        return {
+            id: this.id,
+            name: this.name,
+            email: this.email,
+            cpf: this.cpf,
+            image: this.image,
+            phones: this.phones,
+            avgRating: this.avgRating,
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt
+          };
     }
 }
     

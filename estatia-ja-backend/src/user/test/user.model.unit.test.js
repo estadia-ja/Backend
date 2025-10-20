@@ -50,6 +50,7 @@ describe('test user model', () => {
             email: 'pedro@test.com',
             cpf: '12345678901',
             image: Buffer.from('imageTest'),
+            avgRating: null,
             phones: [{ id: 'phone-cuid', phone: '(11) 99999-8888' }],
             createdAt: new Date('2025-01-01'),
             updatedAt: new Date('2025-01-02')
