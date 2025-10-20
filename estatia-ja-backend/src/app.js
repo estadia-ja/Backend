@@ -3,7 +3,7 @@ import { testConnection } from './database.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger.js';
 import cors from 'cors';
-import userRoutes from './user/routes.js';
+//import userRoutes from './user/routes.js';
 import propertyRoutes from './property/routes.js';
 import reserveRoutes from './reserve/routes.js';
 import propertyValuationRoutes from './propertyValuation/routes.js'
@@ -27,7 +27,7 @@ app.get('/test-db', async (req, res) => {
 });
 
 // Rotas da api
-app.use('/user', userRoutes);
+//app.use('/user', userRoutes);
 app.use('/property', propertyRoutes);
 app.use('/reserve', reserveRoutes);
 app.use('/property-valuation', propertyValuationRoutes);
