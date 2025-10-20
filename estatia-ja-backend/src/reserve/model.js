@@ -7,7 +7,7 @@ class Reserve {
         this.propertyId = data.propertyId,
         this.userId = data.userId;
 
-        if(data.propertyId) {
+        if (data.property) {
             this.property = {
                 id: data.property.id,
                 type: data.property.type,
