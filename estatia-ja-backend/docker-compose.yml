@@ -17,6 +17,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - estadia_ja_network
 
   db-test:
     image: postgres:15
@@ -34,6 +36,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - estadia_ja_network
 
   dbeaver:
     image: dbeaver/cloudbeaver:latest
@@ -47,6 +51,8 @@ services:
       CB_SERVER_NAME: ${CB_SERVER_NAME}
       CB_ADMIN_NAME: ${CB_ADMIN_NAME}
       CB_ADMIN_PASSWORD: ${CB_ADMIN_PASSWORD}
+    networks:
+      - estadia_ja_network
 
   app:
     build: .
@@ -63,20 +69,28 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - estadia_ja_network
 
   tester:
-      build: .
-      container_name: node_app_tester
-      volumes:
-        - .:/app
-        - /app/node_modules
-      environment:
-        - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-test:5432/estadia_test_db
-      depends_on:
-        db-test:
-          condition: service_healthy
-      command: sh -c "npx prisma generate && npx prisma migrate deploy --schema=./prisma/schema.prisma && npm run test:all"
+    build: .
+    container_name: node_app_tester
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-test:5432/estadia_test_db
+    depends_on:
+      db-test:
+        condition: service_healthy
+    command: sh -c "npx prisma generate && npx prisma migrate deploy --schema=./prisma/schema.prisma && npm run test:all"
+    networks: 
+    - estadia_ja_network
 
 volumes:
   postgres_data:
   postgres_test_data:
+
+networks: 
+  estadia_ja_network:
+    external: true
