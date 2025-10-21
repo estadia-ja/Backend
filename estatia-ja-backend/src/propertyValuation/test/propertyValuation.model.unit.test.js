@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import PropertyValuation from '../model.js';
 
-describe('PropertyValuation Model', () => {
+describe('teste model property valuation', () => {
     const mockData = {
         id: 'prop-123',
         noteProperty: 4.5,
