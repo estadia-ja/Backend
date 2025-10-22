@@ -3,7 +3,7 @@ import request from 'supertest';
 import { app } from '../../app';
 import { prisma } from '../../database';
 
-describe('User Routes - Integration Tests (End-to-End', () => {
+describe('User Routes - Integration Tests', () => {
   afterEach(async () => {
     await prisma.propertyValuation.deleteMany({});
     await prisma.clientValuation.deleteMany({});
@@ -12,8 +12,8 @@ describe('User Routes - Integration Tests (End-to-End', () => {
     await prisma.reserve.deleteMany({});
     await prisma.property.deleteMany({});
     await prisma.phone.deleteMany({});
-  await prisma.user.deleteMany({});
-  });
+    await prisma.user.deleteMany({});
+  }); 
 
   describe('post /user', () =>{
     it('sholud create a new user', async () => {

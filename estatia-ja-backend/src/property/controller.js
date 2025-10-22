@@ -86,7 +86,6 @@ const propertyController = {
     async updateImages(req, res){
         try {
             const { id } = req.params;
-            console.log(id)
             const files = req.files;
             const imageBuffers = files ? files.map(file => file.buffer) : [];const userId = req.user.id;
             const updateProperty = await propertyService.updatePropertyImages(id, imageBuffers, userId);
