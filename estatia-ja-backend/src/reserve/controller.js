@@ -6,7 +6,6 @@ const reserveController = {
             const { propertyId } = req.params;
             const userId = req.user.id;
             const reserveData = req.validatedData;
-            console.log(propertyId, userId, reserveData)
             const reserve = await reserveService.createReserve(propertyId, userId, reserveData);
             res.status(201).json(reserve.toJSON());
         } catch (error) {
