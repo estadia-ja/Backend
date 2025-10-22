@@ -1,25 +1,31 @@
-// src/middlewares/authMiddleware.js
+import jwt from 'jsonwebtoken';
 
-export const authMiddleware = (req, res, next) => {
-    // Verifica se a aplicação está rodando em ambiente de teste
-    if (process.env.NODE_ENV === 'test') {
-        // Em testes, esperamos um cabeçalho especial com o ID do usuário
-        const testUserId = req.headers['x-test-user-id'];
+export function authMiddleware(req, res, next) {
+    const authHeader = req.headers.authorization;
 
-        if (!testUserId) {
-            // Se o teste não enviar o cabeçalho, é um erro de configuração do teste
-            return res.status(401).json({ error: 'Header X-Test-User-ID é obrigatório em ambiente de teste.' });
-        }
-
-        req.user = { id: testUserId };
-        console.log(`Autenticado em modo de TESTE com o usuário: ${testUserId}`);
-    } else {
-        // Em modo de desenvolvimento (ou qualquer outro modo), usa o ID fixo
-        const DEV_USER_ID = 'cmgp2h7j30001l65vk6uuak4j';
-
-        req.user = { id: DEV_USER_ID };
-        console.log(`Autenticado em modo de DESENVOLVIMENTO com o usuário: ${DEV_USER_ID}`);
+    if(!authHeader){
+        return res.status(401).json({ message: 'Token não fornacido. Acesso negado' });
+    }
+    const parts = authHeader.split(' ');
+    
+    if(parts.length !== 2) {
+        return res.status(401).json({ message: 'Error no formato do token.' });
     }
 
-    next();
-};
+    const [scheme, token] = parts;
+
+    if(!/^Bearer$/i.test(scheme)){
+        return res.status(401).json({ message: 'Token mal formatado.' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = {
+            id: decoded.userId,
+            email: decoded.email
+        };
+        return next();
+    } catch (error) {
+        return res.status(401).json({ message: 'Token inválido ou expirado.' });
+    }
+}
