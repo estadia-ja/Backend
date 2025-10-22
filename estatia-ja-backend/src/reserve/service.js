@@ -4,7 +4,6 @@ import Reserve from './model.js';
 const reserveService = {
     async createReserve(propertyId, userId, validatedData) {
         const { dateStart, dateEnd } = validatedData;
-        console.log('Datas Recebidas:', { dateStart, dateEnd });
 
         if(new Date(dateStart) < new Date()){
             throw new error("A data de início não pode ser no passado.");
