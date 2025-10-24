@@ -29,7 +29,7 @@ const paymentService = {
         const numberOfDays = Math.ceil(timeDiff / (1000 * 3600 *24 ));
         const totalValue = numberOfDays * reserve.property.dailyRate;
 
-        console.log(`Simulando pagamento de R$${totalValue.toFixed(2)} para a reserva ${reserveId} via ${paymentData.paymentMethod}`);
+        //console.log(`Simulando pagamento de R$${totalValue.toFixed(2)} para a reserva ${reserveId} via ${paymentData.paymentMethod}`);
 
         const createPayment = await prisma.$transaction(async (tx) => {
             const payment = await tx.payment.create({
