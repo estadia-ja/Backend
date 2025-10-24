@@ -77,7 +77,7 @@ describe('paymentService', () => {
             prisma.payment.create.mockResolvedValue(mockCreatedPayment);
             prisma.reserve.update.mockResolvedValue({});
 
-            const result = await paymentService.cretaePayment(reserveId, userId, paymentData);
+            const result = await paymentService.createPayment(reserveId, userId, paymentData);
 
             expect(prisma.reserve.findUnique).toHaveBeenCalledWith({
                 where: { id: reserveId },
@@ -108,7 +108,7 @@ describe('paymentService', () => {
             prisma.payment.create.mockResolvedValue({ id: 'pay-x', paymentValue: expectedTotalValue });
             prisma.reserve.update.mockResolvedValue({});
 
-            await paymentService.cretaePayment(reserveId, userId, paymentData);
+            await paymentService.createPayment(reserveId, userId, paymentData);
 
             expect(prisma.payment.create).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -122,7 +122,7 @@ describe('paymentService', () => {
         it('should thorw en error if reserve does not exist', async () => {
             prisma.reserve.findUnique.mockResolvedValue(null);
 
-            await expect(paymentService.cretaePayment(reserveId, userId, paymentData))
+            await expect(paymentService.createPayment(reserveId, userId, paymentData))
                 .rejects
                 .toThrow('Reserva não existe.')
         });
@@ -135,7 +135,7 @@ describe('paymentService', () => {
 
             prisma.reserve.findUnique.mockResolvedValue(mockReserve);
 
-            await expect(paymentService.cretaePayment(reserveId, userId, paymentData))
+            await expect(paymentService.createPayment(reserveId, userId, paymentData))
                 .rejects
                 .toThrow('Ação não autorizada. Esta reserva não pertence a você.')
         });
@@ -148,7 +148,7 @@ describe('paymentService', () => {
 
             prisma.reserve.findUnique.mockResolvedValue(mockReserve);
 
-            await expect(paymentService.cretaePayment(reserveId, userId, paymentData))
+            await expect(paymentService.createPayment(reserveId, userId, paymentData))
                 .rejects
                 .toThrow("Esta reserva já foi paga.")
         });

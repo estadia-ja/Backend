@@ -2,7 +2,7 @@ import { prisma } from '../database.js';
 import Payment from './model.js';
 
 const paymentService = {
-    async cretaePayment(reserveId, userId, paymentData){
+    async createPayment(reserveId, userId, paymentData){
         const reserve = await prisma.reserve.findUnique({
             where: { id: reserveId },
             include: {
