@@ -52,7 +52,7 @@ model Property {
   CEP              String
   dailyRate        Float
   userId           String
-  user             User            @relation(fields: [userId], references: [id])
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   images           PropertyImage[]
   reserves         Reserve[]
 
@@ -74,9 +74,9 @@ model Reserve {
   dateEnd           DateTime
   status            String
   propertyId        String
-  property          Property           @relation(fields: [propertyId], references: [id])
+  property          Property           @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   userId            String
-  user              User               @relation(fields: [userId], references: [id])
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   propertyValuation PropertyValuation?
   clientValuation   ClientValuation?
   payment           Payment?
