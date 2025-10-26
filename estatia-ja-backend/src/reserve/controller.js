@@ -9,7 +9,7 @@ const reserveController = {
             const reserve = await reserveService.createReserve(propertyId, userId, reserveData);
             res.status(201).json(reserve.toJSON());
         } catch (error) {
-            if(error.message.includes("O imóvel já está reservado para estas datas. Conflito de disponibilidade.")){
+            if(error.message.includes("O imóvel já está reservado para estas datas")){
                 return res.status(409).json({ error: error.message });
             }
 
