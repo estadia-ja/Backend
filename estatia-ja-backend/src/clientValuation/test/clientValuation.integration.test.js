@@ -65,7 +65,7 @@ const propertyData3 = {
     dailyRate: 500.0,
 };
 
-describe('PropertyValuation Routes - Integration test', () => {
+describe('ClientValuation Routes - Integration test', () => {
     let ownerToken, renterToken, randomToken;
     let owner, renter, randomUser;
     let property1, property2, property3, reserve1, reserve2, reserve3;
@@ -186,75 +186,75 @@ describe('PropertyValuation Routes - Integration test', () => {
         await prisma.user.deleteMany({});
     });
 
-    describe('POST /reserve/reserveId/property-valuation', () => {
-        it('should create a property valuation', async () => {
+    describe('POST /reserve/reserveId/client-valuation', () => {
+        it('should create a client valuation', async () => {
             const valuationData = {
-                noteProperty: 5,
-                commentProperty: 'Ótima estadia!',
+                noteClient: 5,
+                commentClient: 'otimo cliente',
             };
     
             const response = await request(app)
-                .post(`/reserve/${reserve1.id}/property-valuation`)
-                .set('Authorization', `Bearer ${renterToken}`)
+                .post(`/reserve/${reserve1.id}/client-valuation`)
+                .set('Authorization', `Bearer ${ownerToken}`)
                 .send(valuationData);
 
-            expect(response.status).toBe(201);
+            expect(response.status).toBe(200);
             expect(response.body.reserveId).toBe(reserve1.id);
 
-            const propertyValuationInDb = await prisma.propertyValuation.findUnique({
+            const clientValuationInDb = await prisma.clientValuation.findUnique({
                 where: { id: response.body.id }
             });
 
-            expect(propertyValuationInDb).not.toBeNull();
-            expect(propertyValuationInDb.reserveId).toBe(reserve1.id);
+            expect(clientValuationInDb).not.toBeNull();
+            expect(clientValuationInDb.reserveId).toBe(reserve1.id);
         });
 
-        it('should resturn 409 if reserve already valuated', async () => {
-            await prisma.propertyValuation.create({
+        it('should resturn 409 if client already valuated', async () => {
+            await prisma.clientValuation.create({
                data: {
                     reserveId: reserve1.id,
-                    noteProperty: 5,
-                    commentProperty: 'Ótima estadia!',
+                    noteClient: 5,
+                    commentClient: 'otimo cliente',
                }
             });
 
             const valuationData = {
-                noteProperty: 5,
-                commentProperty: 'Ótima estadia!',
+                noteClient: 5,
+                commentClient: 'cliente muito bom',
             };
 
             const response = await request(app)
-                .post(`/reserve/${reserve1.id}/property-valuation`)
-                .set('Authorization', `Bearer ${renterToken}`)
+                .post(`/reserve/${reserve1.id}/client-valuation`)
+                .set('Authorization', `Bearer ${ownerToken}`)
                 .send(valuationData);
 
             expect(response.status).toBe(409);
-            expect(response.body.error).toContain('Esta reserva já foi avalia.');
+            expect(response.body.error).toContain('Este cliente já foi avaliado para esta reserva.');
         });
 
-        it('should return 403 if if a different user tries to valuate the reserve', async () => {
+        it('should return 403 if if a different user tries to valuate the client', async () => {
             const valuationData = {
-                noteProperty: 5,
-                commentProperty: 'Ótima estadia!',
+                noteClient: 5,
+                commentClient: 'excelente cliente',
             };
     
             const response = await request(app)
-                .post(`/reserve/${reserve1.id}/property-valuation`)
+                .post(`/reserve/${reserve1.id}/client-valuation`)
                 .set('Authorization', `Bearer ${randomToken}`)
                 .send(valuationData);
 
             expect(response.status).toBe(403);
-            expect(response.body.error).toContain('Ação não autorizada. Você não pode avaliar uma reserva que não é sua.');
+            expect(response.body.error).toContain('Ação não autorizada. Você não é o proprietário do imóvel desta reserva.');
         });
 
-        it('should return 401 if user is not authenticated',async () => {
+        it('should return 401 if oner is not authenticated',async () => {
             const valuationData = {
-                noteProperty: 5,
-                commentProperty: 'Ótima estadia!',
+                noteClient: 5,
+                commentClient: 'otimo cliente',
             };
     
             const response = await request(app)
-                .post(`/reserve/${reserve1.id}/property-valuation`)
+                .post(`/reserve/${reserve1.id}/client-valuation`)
                 .send(valuationData);
 
             expect(response.status).toBe(401);
@@ -262,12 +262,12 @@ describe('PropertyValuation Routes - Integration test', () => {
 
         it('should return 400 if validations fails', async () => {
             const valuationData = {
-                noteProperty: 10,
-                commentProperty: 'Ótima estadia!',
+                noteClient: 10,
+                commentClient: 'otimo cliente',
             };
     
             const response = await request(app)
-                .post(`/reserve/${reserve1.id}/property-valuation`)
+                .post(`/reserve/${reserve1.id}/client-valuation`)
                 .set('Authorization', `Bearer ${renterToken}`)
                 .send(valuationData);
 
@@ -277,32 +277,32 @@ describe('PropertyValuation Routes - Integration test', () => {
 
     describe('DELETE /property-valuation/valuationId', () => {
         it('Should delete a valuation', async () => {
-            const valuation = await prisma.propertyValuation.create({
+            const valuation = await prisma.clientValuation.create({
                 data: {
                     reserveId: reserve1.id,
-                    noteProperty: 5,
-                    commentProperty: 'Ótima estadia!',
+                    noteClient: 5,
+                    commentClient: 'otimo cliente',
                 }
             });
     
             const response = await request(app)
-                .delete(`/reserve/${reserve1.id}/property-valuation/${valuation.id}`)
-                .set('Authorization', `Bearer ${renterToken}`)
+                .delete(`/reserve/${reserve1.id}/client-valuation/${valuation.id}`)
+                .set('Authorization', `Bearer ${ownerToken}`)
     
             expect(response.status).toBe(204);
         });
     
         it('should return 403 if a different user tries to delete a valuate', async () => {
-            const valuation = await prisma.propertyValuation.create({
+            const valuation = await prisma.clientValuation.create({
                 data: {
                     reserveId: reserve1.id, 
-                    noteProperty: 5,
-                    commentProperty: 'Ótima estadia!',
+                    noteClient: 5,
+                    commentClient: 'otimo cliente',
                 }
             });
     
             const response = await request(app)
-                .delete(`/reserve/${reserve1.id}/property-valuation/${valuation.id}`)
+                .delete(`/reserve/${reserve1.id}/client-valuation/${valuation.id}`)
                 .set('Authorization', `Bearer ${randomToken}`)
     
             expect(response.status).toBe(403); 
