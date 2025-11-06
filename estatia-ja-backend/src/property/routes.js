@@ -253,6 +253,41 @@ router.get('/ranked-by-valuation', propertyController.findRanked);
 
 /**
  * @swagger
+ * /property/city/{city}:
+ *   get:
+ *     summary: Busca imóveis por cidade
+ *     tags: [Imóveis]
+ *     parameters:
+ *       - in: path
+ *         name: city
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: O nome da cidade para buscar imóveis.
+ *     responses:
+ *       '200':
+ *         description: Lista de imóveis encontrados na cidade, cada um com sua nota média.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/PropertyWithRating'
+ *       '404':
+ *         description: Nenhum imóvel encontrado nesta cidade.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Nenhum imóvel encontrado nesta cidade"
+ */
+router.get("/city/:city", propertyController.getByCity);
+
+/**
+ * @swagger
  * /property/{id}:
  *   get:
  *     summary: Retorna um imóvel específico pelo seu ID, incluindo sua avaliação média

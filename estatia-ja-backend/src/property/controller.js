@@ -54,6 +54,19 @@ const propertyController = {
         }
     },
 
+    // Em 'propertyController.js'
+
+    async getByCity(req, res) {
+        try {
+            const { city } = req.params;
+            const properties = await propertyService.getPropertyByCity(city);
+            
+            res.status(200).json(properties);
+        } catch (error) {
+            res.status(404).json({ error: error.message });
+        }
+    },
+
     async findRanked(req, res) {
         try {
             const properties = await propertyService.findPropertiesRankedByValuation();

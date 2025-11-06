@@ -139,6 +139,50 @@ const propertyService = {
         return rankedProperties.map(property => new Property(property))
     },
 
+    async getPropertyByCity(city) {
+        const properties = await prisma.property.findMany({
+            where: { 
+                city: city 
+            }, 
+            include: {
+                images: {
+                    select: {
+                        id: true 
+                    }
+                },
+                user: { select: { id: true, name: true, email: true } }
+            },
+        });
+    
+        if (!properties || properties.length === 0) {
+            throw new Error('Nenhum imóvel encontrado nesta cidade');
+        }
+    
+        const propertiesWithRating = await Promise.all(
+            properties.map(async (property) => {
+                const ratingAggregation = await prisma.propertyValuation.aggregate({
+                    _avg: {
+                        noteProperty: true,
+                    },
+                    where: {
+                        reserve: {
+                            propertyId: property.id,
+                        },
+                    },
+                });
+    
+                const avgRating = ratingAggregation._avg.noteProperty || 0;
+    
+                return {
+                    ...property,
+                    avgRating: avgRating,
+                };
+            })
+        );
+    
+        return propertiesWithRating;
+    },
+
     async updatePropertyData(propertyId, updateData, userId){
         const property = await prisma.property.findUnique({
             where: { id: propertyId }
