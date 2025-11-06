@@ -229,6 +229,60 @@ describe('test property service', () => {
         });
     });
 
+    describe('getPropertiesByCity', () => {
+
+        it('should return a list of properties with avgRating for a city', async () => {
+            const testCity = "São Paulo";
+            const propertiesFromDb = [
+                { id: 'prop-1', type: 'Casa', city: testCity, userId: 'user-1' },
+                { id: 'prop-2', type: 'Apartamento', city: testCity, userId: 'user-2' },
+            ];
+    
+            prisma.property.findMany.mockResolvedValue(propertiesFromDb);
+            
+            prisma.propertyValuation.aggregate.mockResolvedValue({
+                _avg: { noteProperty: 4.5 } 
+            });
+    
+            const result = await propertyService.getPropertyByCity(testCity);
+    
+            expect(prisma.property.findMany).toHaveBeenCalledTimes(1);
+            expect(prisma.property.findMany).toHaveBeenCalledWith({
+                where: { city: testCity }, 
+                include: {
+                    images: {
+                        select: { id: true } 
+                    },
+                    user: { 
+                        select: { id: true, name: true, email: true }
+                    }
+                }
+            });
+    
+            expect(prisma.propertyValuation.aggregate).toHaveBeenCalledTimes(2);
+    
+            expect(result).toHaveLength(2);
+            expect(result[0].id).toBe('prop-1');
+            expect(result[0]).toHaveProperty('avgRating', 4.5);
+        });
+    
+        it('should throw an error if no properties are found', async () => {
+            const testCity = 'CidadeInexistente';
+            
+            prisma.property.findMany.mockResolvedValue([]);
+            
+            await expect(
+                propertyService.getPropertyByCity(testCity)
+            ).rejects.toThrow('Nenhum imóvel encontrado nesta cidade');
+    
+            expect(prisma.property.findMany).toHaveBeenCalledWith(
+                expect.objectContaining({ 
+                    where: { city: testCity }
+                })
+            );
+        });
+    });
+
     describe('findPropertiesRankedByValuation', () => {
         it('should return properties ranked by average ratin', async () => {
             const mockRankedData = [

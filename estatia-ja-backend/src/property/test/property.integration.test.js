@@ -387,6 +387,71 @@ describe('Property Routes - Integration Tests', () => {
         });
     });
 
+    describe('GET /property/city/:city', () => {
+        let propSP1, propSP2, propRJ;
+
+        beforeEach(async () => {
+            propSP1 = await prisma.property.create({
+                data: {
+                    ...propertyData,
+                    city: 'São Paulo',
+                    CEP: '10000-001',
+                    type: 'Casa de SP 1',
+                    userId: testUser.id,
+                },
+            });
+            propSP2 = await prisma.property.create({
+                data: {
+                    ...propertyData,
+                    city: 'São Paulo',
+                    CEP: '10000-002',
+                    type: 'Casa de SP 2',
+                    userId: testUser.id,
+                },
+            });
+            propRJ = await prisma.property.create({
+                data: {
+                    ...propertyData,
+                    city: 'Rio de Janeiro',
+                    CEP: '20000-001',
+                    type: 'Casa do RJ',
+                    userId: otherUser.id,
+                },
+            });
+        });
+
+        it('should return properties in a specific city with their avgRating', async () => {
+            const res1_prop1 = await prisma.reserve.create({ data: { dateStart: new Date(), dateEnd: new Date(), status: 'FINALIZADA', propertyId: propSP1.id, userId: otherUser.id }});
+            await prisma.propertyValuation.create({ data: { noteProperty: 5.0, reserveId: res1_prop1.id }});
+            const res2_prop1 = await prisma.reserve.create({ data: { dateStart: new Date(), dateEnd: new Date(), status: 'FINALIZADA', propertyId: propSP1.id, userId: otherUser.id }});
+            await prisma.propertyValuation.create({ data: { noteProperty: 3.0, reserveId: res2_prop1.id }});
+
+            const res1_prop2 = await prisma.reserve.create({ data: { dateStart: new Date(), dateEnd: new Date(), status: 'FINALIZADA', propertyId: propSP2.id, userId: otherUser.id }});
+            await prisma.propertyValuation.create({ data: { noteProperty: 5.0, reserveId: res1_prop2.id }});
+
+            const response = await request(app).get('/property/city/São Paulo');
+
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveLength(2); 
+            
+            const p1 = response.body.find(p => p.id === propSP1.id);
+            const p2 = response.body.find(p => p.id === propSP2.id);
+
+            expect(p1.type).toBe('Casa de SP 1');
+            expect(p1.avgRating).toBe(4.0); 
+
+            expect(p2.type).toBe('Casa de SP 2');
+            expect(p2.avgRating).toBe(5.0); 
+        });
+
+        it('should return 404 if no properties are found in that city', async () => {
+            const response = await request(app).get('/property/city/CidadeInexistente');
+
+            expect(response.status).toBe(404);
+            expect(response.body.error).toBe('Nenhum imóvel encontrado nesta cidade');
+        });
+    });
+
     describe('GET /property/rank-by-valuation', () => {
         it('should return properties ranked by average valuation', async () => {
             const prop1 = await prisma.property.create({ 

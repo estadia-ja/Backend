@@ -8,6 +8,7 @@ vi.mock('../service.js', () => ({
         createProperty: vi.fn(),
         getAllProperties: vi.fn(),
         getPropertyById: vi.fn(),
+        getPropertyByCity: vi.fn(),
         deleleProperty: vi.fn(),
         updatePropertyData: vi.fn(),
         updatePropertyImages: vi.fn(),
@@ -145,6 +146,39 @@ describe('test property controller', () => {
             expect(mockRes.status).toHaveBeenCalledWith(200);
             expect(mockRes.json).toHaveBeenCalledWith(mockProperties);
         })
+    });
+
+    describe('getByCity', () => {
+    
+        it('should return a list of plain properties with status 200', async () => {
+            const mockPlainProperties = [
+                { id: 'prop-1', type: 'Casa', city:"São Paulo", avgRating: 4.0 },
+                { id: 'prop-2', type: 'Apartamento', city:"São Paulo", avgRating: 4.5 },
+            ];
+    
+            propertyService.getPropertyByCity.mockResolvedValue(mockPlainProperties);
+    
+            mockReq.params = { city: "São Paulo" };
+    
+            await propertyController.getByCity(mockReq, mockRes);
+    
+            expect(propertyService.getPropertyByCity).toHaveBeenCalledWith("São Paulo");
+            expect(mockRes.status).toHaveBeenCalledWith(200);
+            expect(mockRes.json).toHaveBeenCalledWith(mockPlainProperties);
+        });
+    
+        it('should return status 404 on service error', async () => {
+            const errorMessage = 'Nenhum imóvel encontrado';
+            
+            propertyService.getPropertyByCity.mockRejectedValue(new Error(errorMessage));
+    
+            mockReq.params = { city: "CidadeInexistente" };
+    
+            await propertyController.getByCity(mockReq, mockRes);
+    
+            expect(mockRes.status).toHaveBeenCalledWith(404);
+            expect(mockRes.json).toHaveBeenCalledWith({ error: errorMessage });
+        });
     });
 
     describe('findRanked', () => {

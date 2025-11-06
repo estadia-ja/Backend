@@ -54,8 +54,6 @@ const propertyController = {
         }
     },
 
-    // Em 'propertyController.js'
-
     async getByCity(req, res) {
         try {
             const { city } = req.params;
