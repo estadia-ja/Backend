@@ -17,6 +17,7 @@ model User {
   phones     Phone[]
   properties Property[]
   reserves   Reserve[]
+  favorites  FavoriteProperty[]
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 
@@ -36,6 +37,7 @@ model Property {
   id               String          @id @default(cuid())
   type             String
   description      String
+  maxGuests        Int      @default(1)
   numberOfBedroom  Int
   numberOfSuite    Int
   numberOfGarage   Int
@@ -55,6 +57,7 @@ model Property {
   user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   images           PropertyImage[]
   reserves         Reserve[]
+  favoritedBy      FavoriteProperty[]
 
   @@map("properties")
 }
@@ -66,6 +69,17 @@ model PropertyImage {
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@map("property_images")
+}
+
+model FavoriteProperty {
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@id([userId, propertyId])
+  @@map("favorite_properties")
 }
 
 model Reserve {
