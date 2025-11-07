@@ -44,6 +44,18 @@ const propertyController = {
         }
     },
 
+    async getImageById(req, res) {
+        try {
+            const { imageId } = req.params;
+            const imageBuffer = await propertyService.getImageById(imageId);
+
+            res.set("Content-Type", "image/png");
+            res.send(imageBuffer);
+        } catch (error) {
+            res.status(404).json({ error: error.message });
+        }
+    },
+
     async findAvailable(req, res){
         try {
             const { dateStart, dateEnd, state, guests } = req.query;

@@ -381,6 +381,28 @@ router.get('/:propertyId/images', propertyController.getAllImages);
 
 /**
  * @swagger
+ * /property/image/{imageId}:
+ *   get:
+ *     summary: Retorna a imagem (arquivo) de um imóvel pelo ID da imagem
+ *     tags: [Imóveis]
+ *     parameters:
+ *       - in: path
+ *         name: imageId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: O arquivo de imagem.
+ *         content:
+ *           image/*: {}
+ *       '404':
+ *         description: Imagem não encontrada.
+ */
+router.get('/image/:imageId', propertyController.getImageById);
+
+/**
+ * @swagger
  * /property/{id}:
  *   put:
  *     summary: Atualiza os dados de um imóvel (sem alterar imagens)

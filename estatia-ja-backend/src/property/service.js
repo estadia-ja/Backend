@@ -92,6 +92,19 @@ const propertyService = {
         return images;
     },
 
+    async getImageById(imageId) {
+        const image = await prisma.propertyImage.findUnique({
+            where: { id: imageId },
+            select: { image: true } 
+        });
+
+        if (!image) {
+            throw new Error("Imagem não encontrada");
+        }
+        
+        return image.image;
+    },
+
     async findAvailableProperties(dateStart, dateEnd, state, guests) {
         if (!dateStart || !dateEnd) {
             throw new Error("as datas de início e fim são obrigatórias.");
