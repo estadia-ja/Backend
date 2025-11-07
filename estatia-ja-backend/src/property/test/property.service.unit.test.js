@@ -187,42 +187,91 @@ describe('test property service', () => {
     });
 
     describe('findAvailableProperties', () =>{
-        it('should return property that have no conflicting reservations', async () => {
+        it('should build query for dates only', async () => {
             const dateStart = '2025-11-10T10:00:00Z';
             const dateEnd = '2025-11-15T10:00:00Z';
-            const mockAvailableProperties = [
-                { id: 'prop-1', type: 'Casa', images: [] },
-                { id: 'prop-2', type: 'Apartamento', images: [] },
-                { id: 'prop-3', type: 'Sítio', images: [] },
-            ];
-
+            const mockAvailableProperties = [{ id: 'prop-1' }];
+    
             prisma.property.findMany.mockResolvedValue(mockAvailableProperties);
-
-            const result = await propertyService.findAvailableProperties(dateStart, dateEnd);
-
+    
+            const result = await propertyService.findAvailableProperties(dateStart, dateEnd, undefined, undefined);
+    
+            const expectedWhere = {
+                reserves: {
+                    none: {
+                        status: { not: 'CANCELADA' },
+                        AND: [
+                            { dateStart: { lt: new Date(dateEnd) } },
+                            { dateEnd: { gt: new Date(dateStart) } }
+                        ]
+                    }
+                }
+            };
+    
+            const expectedInclude = {
+                images: {
+                    select: { id: true }
+                },
+                user: {
+                    select: { id: true, name: true }
+                }
+            };
+    
             expect(prisma.property.findMany).toHaveBeenCalledWith({
-                where: {
-                    reserves: {
-                        none: {
-                            status: { not: 'CANCELADA' },
-                            AND: [
-                                { dateStart: { lt: new Date(dateEnd) } },
-                                { dateEnd: { gt: new Date(dateStart) } }
-                            ]
-                        }
+                where: expectedWhere,
+                include: expectedInclude
+            });
+    
+            expect(result).toHaveLength(1);
+            expect(result[0].id).toBe('prop-1');
+            expect(result[0]).not.toBeInstanceOf(Property); 
+        });
+    
+        it('should build query with all filters (dates, state, guests)', async () => {
+            const dateStart = '2025-11-10T10:00:00Z';
+            const dateEnd = '2025-11-15T10:00:00Z';
+            const state = 'RJ';
+            const guests = '3';
+    
+            prisma.property.findMany.mockResolvedValue([{ id: 'prop-2' }]);
+    
+            const result = await propertyService.findAvailableProperties(dateStart, dateEnd, state, guests);
+    
+            const expectedWhere = {
+                reserves: {
+                    none: {
+                        status: { not: 'CANCELADA' },
+                        AND: [
+                            { dateStart: { lt: new Date(dateEnd) } },
+                            { dateEnd: { gt: new Date(dateStart) } }
+                        ]
                     }
                 },
-                include: { images: true }
+                state: 'RJ',
+                maxGuests: {
+                    gte: 3
+                }
+            };
+            
+            const expectedInclude = {
+                images: { select: { id: true } },
+                user: { select: { id: true, name: true } }
+            };
+    
+            expect(prisma.property.findMany).toHaveBeenCalledWith({
+                where: expectedWhere,
+                include: expectedInclude
             });
-            expect(result).toHaveLength(3);
-            expect(result[0]).toBeInstanceOf(Property);
-            expect(result[0].id).toBe('prop-1');
+            
+            expect(result).toHaveLength(1);
+            expect(result[0].id).toBe('prop-2');
         });
-
+    
         it('should throw an error if dates are missing', async () => {
             await expect(propertyService.findAvailableProperties(null, '2025-11-15T10:00:00Z'))
             .rejects
             .toThrow('as datas de início e fim são obrigatórias.');
+            
             await expect(propertyService.findAvailableProperties('2025-11-10T10:00:00Z', undefined))
                 .rejects
                 .toThrow('as datas de início e fim são obrigatórias.');

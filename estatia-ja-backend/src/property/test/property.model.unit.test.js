@@ -7,6 +7,7 @@ describe('test property model', () => {
             id: 1,
             type: 'Casa',
             description: 'Uma casa muito boa para a família inteira',
+            maxGuests: 4,
             numberOfBedroom: 3,
             numberOfSuite: 1,
             numberOfGarage: 2,

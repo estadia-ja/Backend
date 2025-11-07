@@ -64,6 +64,7 @@ describe('Property Routes - Integration Tests', () => {
     const propertyData = {
         type: 'Casa',
         description: 'Casa de teste com piscina',
+        maxGuests: 4,
         numberOfBedroom: 3,
         numberOfSuite: 1,
         numberOfGarage: 2,
@@ -88,6 +89,7 @@ describe('Property Routes - Integration Tests', () => {
                 .set('Authorization', `Bearer ${token}`)
                 .field('type', propertyData.type)
                 .field('description', propertyData.description)
+                .field('maxGuests', propertyData.maxGuests)
                 .field('numberOfBedroom', propertyData.numberOfBedroom)
                 .field('numberOfSuite', propertyData.numberOfSuite)
                 .field('numberOfGarage', propertyData.numberOfGarage)
@@ -133,6 +135,7 @@ describe('Property Routes - Integration Tests', () => {
                 .set('Authorization', `Bearer ${token}`)
                 .field('type', propertyData.type)
                 .field('description', propertyData.description)
+                .field('maxGuests', propertyData.maxGuests)
                 .field('numberOfBedroom', propertyData.numberOfBedroom)
                 .field('numberOfSuite', propertyData.numberOfSuite)
                 .field('numberOfGarage', propertyData.numberOfGarage)
@@ -341,49 +344,91 @@ describe('Property Routes - Integration Tests', () => {
     });
 
     describe('GET /property/available', () => {
-        it('should find avalable properties between dates', async () => {
-            const prop1 = await prisma.property.create({
-                data:{
+        let propSP_2guests, propSP_5guests, propRJ_4guests;
+    
+        beforeEach(async () => {
+            propSP_2guests = await prisma.property.create({
+                data: {
                     ...propertyData,
                     userId: testUser.id,
-                    type: "Apto", 
-                    CEP: '12345-001'
+                    type: "Apto SP 2 Pessoas", 
+                    CEP: '12345-001',
+                    city: 'São Paulo',
+                    state: 'SP',
+                    maxGuests: 2
                 }
             });
-            const prop2 = await prisma.property.create({
-                data:{
+            propSP_5guests = await prisma.property.create({
+                data: {
                     ...propertyData,
                     userId: testUser.id,
-                    type: "Casa", 
-                    CEP: '12345-002'
+                    type: "Casa SP 5 Pessoas", 
+                    CEP: '12345-002',
+                    city: 'São Paulo',
+                    state: 'SP',
+                    maxGuests: 5
                 }
             });
-
+            propRJ_4guests = await prisma.property.create({
+                data: {
+                    ...propertyData,
+                    userId: otherUser.id,
+                    type: "Casa RJ 4 Pessoas", 
+                    CEP: '12345-003',
+                    city: 'Rio de Janeiro',
+                    state: 'RJ',
+                    maxGuests: 4
+                }
+            });
+        });
+    
+        it('should find available properties just between dates (and ignore others)', async () => {
             await prisma.reserve.create({
                 data: {
                     dateStart: new Date('2025-11-10T14:00:00Z'),
                     dateEnd: new Date('2025-11-15T11:00:00Z'),
                     status: 'CONFIRMADA',
-                    propertyId: prop2.id,
+                    propertyId: propSP_5guests.id,
                     userId: testUser.id,
                 }
             });
-
-            const dateStart = '2025-11-12T00:00:00Z';
+    
+            const dateStart = '2025-11-12T00:00:00Z'; 
             const dateEnd = '2025-11-14T00:00:00Z';
+            
             const response = await request(app)
                 .get(`/property/available?dateStart=${dateStart}&dateEnd=${dateEnd}`);
             
             expect(response.status).toBe(200);
-            expect(response.body).toHaveLength(1);
-            expect(response.body[0].id).toBe(prop1.id);
+            expect(response.body).toHaveLength(2);
+            
+            const ids = response.body.map(p => p.id);
+            expect(ids).toContain(propSP_2guests.id);
+            expect(ids).toContain(propRJ_4guests.id);
+            expect(ids).not.toContain(propSP_5guests.id);
         });
+    
+        it('should find available properties filtering by state and guests', async () => {
+            const dateStart = '2025-12-01T00:00:00Z'; 
+            const dateEnd = '2025-12-05T00:00:00Z';
+            const state = 'SP';
+            const guests = '3';
+    
+            const response = await request(app)
+                .get(`/property/available?dateStart=${dateStart}&dateEnd=${dateEnd}&state=${state}&guests=${guests}`);
 
+            
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveLength(1); 
+            expect(response.body[0].id).toBe(propSP_5guests.id);
+        });
+    
         it('should return 400 if dates are missing', async () => {
             const response = await request(app)
                 .get('/property/available?dateStart=2025-11-12T00:00:00Z');
             
             expect(response.status).toBe(400);
+            expect(response.body.error).toBe("as datas de início e fim são obrigatórias.");
         });
     });
 

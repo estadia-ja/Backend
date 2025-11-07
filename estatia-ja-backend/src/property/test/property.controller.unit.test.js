@@ -133,19 +133,57 @@ describe('test property controller', () => {
     });
 
     describe('findAvailable', () => {
-        it('should return available property with status 200', async () => {
-            const mockProperties = [new Property({ id: 'prop-1' })];
+        it('should return available properties with status 200 (dates only)', async () => {
+            const mockProperties = [{ id: 'prop-1' }];
             const dateStart = '2025-12-01';
             const dateEnd = '2025-12-10';
+            
             propertyService.findAvailableProperties.mockResolvedValue(mockProperties);
             mockReq.query = { dateStart, dateEnd };
-
+    
             await propertyController.findAvailable(mockReq, mockRes);
-
-            expect(propertyService.findAvailableProperties).toHaveBeenCalledWith(dateStart, dateEnd);
+    
+            expect(propertyService.findAvailableProperties).toHaveBeenCalledWith(
+                dateStart, 
+                dateEnd, 
+                undefined, 
+                undefined 
+            );
             expect(mockRes.status).toHaveBeenCalledWith(200);
             expect(mockRes.json).toHaveBeenCalledWith(mockProperties);
-        })
+        });
+    
+        it('should call service with all filters (dates, state, guests)', async () => {
+            const mockProperties = [{ id: 'prop-2' }];
+            const dateStart = '2025-12-01';
+            const dateEnd = '2025-12-10';
+            const state = 'SP';
+            const guests = '4';
+            
+            propertyService.findAvailableProperties.mockResolvedValue(mockProperties);
+            mockReq.query = { dateStart, dateEnd, state, guests };
+    
+            await propertyController.findAvailable(mockReq, mockRes);
+    
+            expect(propertyService.findAvailableProperties).toHaveBeenCalledWith(
+                dateStart, 
+                dateEnd, 
+                state, 
+                guests
+            );
+            expect(mockRes.status).toHaveBeenCalledWith(200);
+            expect(mockRes.json).toHaveBeenCalledWith(mockProperties);
+        });
+    
+        it('should return 400 if dates are missing', async () => {
+            propertyService.findAvailableProperties.mockRejectedValue(new Error("as datas de início e fim são obrigatórias."));
+            mockReq.query = { dateStart: '2025-12-01' };
+    
+            await propertyController.findAvailable(mockReq, mockRes);
+            
+            expect(mockRes.status).toHaveBeenCalledWith(400);
+            expect(mockRes.json).toHaveBeenCalledWith({ error: "as datas de início e fim são obrigatórias." });
+        });
     });
 
     describe('getByCity', () => {
