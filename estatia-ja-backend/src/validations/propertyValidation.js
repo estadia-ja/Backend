@@ -3,6 +3,7 @@ import Joi from 'joi';
 export const createPropertySchema = Joi.object({
     type: Joi.string().required(),
     description: Joi.string().min(10).required(),
+    maxGuests:Joi.number().integer().min(1).required(),
     numberOfBedroom: Joi.number().integer().min(0).required(),
     numberOfSuite: Joi.number().integer().min(0).required(),
     numberOfGarage: Joi.number().integer().min(0).required(),
@@ -23,6 +24,7 @@ export const createPropertySchema = Joi.object({
 export const updatePropertySchema = Joi.object({
     type: Joi.string().required(),
     description: Joi.string().min(10).required(),
+    maxGuests:Joi.number().integer().min(1).required(),
     numberOfBedroom: Joi.number().integer().min(0).required(),
     numberOfSuite: Joi.number().integer().min(0).required(),
     numberOfGarage: Joi.number().integer().min(0).required(),

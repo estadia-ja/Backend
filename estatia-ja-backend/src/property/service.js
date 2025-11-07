@@ -92,29 +92,51 @@ const propertyService = {
         return images;
     },
 
-    async findAvailableProperties(dateStart, dateEnd) {
-        if( !dateStart || !dateEnd ){
+    async findAvailableProperties(dateStart, dateEnd, state, guests) {
+        if (!dateStart || !dateEnd) {
             throw new Error("as datas de início e fim são obrigatórias.");
         }
 
-        const availableProperties = await prisma.property.findMany({
-            where: {
-                reserves:{
-                    none: {
-                        status: { not: 'CANCELADA'},
-                        AND: [
-                            { dateStart: { lt: new Date(dateEnd) }},
-                            { dateEnd: { gt: new Date(dateStart) }}
-                        ]
-                    }
+        const whereClause = {
+            reserves: {
+                none: {
+                    status: { not: 'CANCELADA' },
+                    AND: [
+                        { dateStart: { lt: new Date(dateEnd) } },
+                        { dateEnd: { gt: new Date(dateStart) } }
+                    ]
                 }
-            },
+            }
+        };
+
+        if (state) {
+            whereClause.state = state; 
+        }
+
+        if (guests) {
+            const numGuests = parseInt(guests, 10);
+            if (!isNaN(numGuests) && numGuests > 0) {
+                whereClause.maxGuests = {
+                    gte: numGuests
+                };
+            }
+        }
+
+        const availableProperties = await prisma.property.findMany({
+            where: whereClause,
             include: {
-                images: true
+                images: {
+                    select: {
+                        id: true
+                    }
+                },
+                user: {
+                    select: { id: true, name: true }
+                }
             }
         });
-
-        return availableProperties.map(property => new Property(property));
+        
+        return availableProperties;
     },
 
     async findPropertiesRankedByValuation() {

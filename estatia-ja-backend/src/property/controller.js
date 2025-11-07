@@ -46,9 +46,15 @@ const propertyController = {
 
     async findAvailable(req, res){
         try {
-            const { dateStart, dateEnd } = req.query;
-            const properties = await propertyService.findAvailableProperties(dateStart, dateEnd);
-            res.status(200).json(properties.map(property => property.toJSON()));
+            const { dateStart, dateEnd, state, guests } = req.query;
+
+            const properties = await propertyService.findAvailableProperties(
+                dateStart, 
+                dateEnd, 
+                state, 
+                guests
+            );
+            res.status(200).json(properties);
         } catch (error) {
             res.status(400).json({ error: error.message });
         }

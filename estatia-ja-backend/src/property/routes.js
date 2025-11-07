@@ -36,6 +36,7 @@ const upload = multer({ storage: multer.memoryStorage() });
  *             required:
  *               - type
  *               - description
+ *               - maxGuests
  *               - numberOfBedroom
  *               - numberOfSuite
  *               - numberOfGarage
@@ -58,6 +59,9 @@ const upload = multer({ storage: multer.memoryStorage() });
  *               description:
  *                 type: string
  *                 example: "Casa espaçosa com 3 quartos e piscina."
+ *               maxGuests:
+ *                 type: integer
+ *                 example: 4
  *               numberOfBedroom:
  *                 type: integer
  *                 example: 3
@@ -124,6 +128,8 @@ const upload = multer({ storage: multer.memoryStorage() });
  *                   type: string
  *                 description:
  *                   type: string
+ *                 maxGuests:
+ *                   type: Number
  *                 dailyRate:
  *                   type: number
  *                   format: float
@@ -200,7 +206,7 @@ router.get('/', propertyController.getAll);
  * @swagger
  * /property/available:
  *   get:
- *     summary: Busca imóveis disponíveis por período
+ *     summary: Busca imóveis disponíveis por período, estado e capacidade
  *     tags: [Imóveis]
  *     parameters:
  *       - in: query
@@ -209,17 +215,29 @@ router.get('/', propertyController.getAll);
  *         schema:
  *           type: string
  *           format: date-time
- *         description: "Data de início da busca (formato ISO 8601: 2025-12-20T14:00:00Z)"
+ *         description: "Data de início da busca (ISO 8601: 2025-12-20T14:00:00Z)"
  *       - in: query
  *         name: dateEnd
  *         required: true
  *         schema:
  *           type: string
  *           format: date-time
- *         description: "Data final da busca (formato ISO 8601: 2025-12-27T11:00:00Z)"
+ *         description: "Data final da busca (ISO 8601: 2025-12-27T11:00:00Z)"
+ *       - in: query
+ *         name: state
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: "Filtra pelo estado (ex: SP, RJ, MG)"
+ *       - in: query
+ *         name: guests
+ *         required: false
+ *         schema:
+ *           type: integer
+ *         description: "Número de pessoas (capacidade mínima)"
  *     responses:
  *       '200':
- *         description: Lista de imóveis disponíveis no período.
+ *         description: Lista de imóveis disponíveis que atendem aos filtros.
  *         content:
  *           application/json:
  *             schema:
@@ -230,7 +248,6 @@ router.get('/', propertyController.getAll);
  *         description: Datas de busca não fornecidas ou inválidas.
  */
 router.get('/available', propertyController.findAvailable);
-
 /**
  * @swagger
  * /property/ranked-by-valuation:

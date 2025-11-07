@@ -3,6 +3,7 @@ class Property {
         this.id = data.id;
         this.type = data.type;
         this.description = data.description;
+        this.maxGuests = data.maxGuests;
         this.numberOfBedroom = data.numberOfBedroom;
         this.numberOfSuite = data.numberOfSuite;
         this.numberOfGarage = data.numberOfGarage;
