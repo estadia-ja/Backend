@@ -40,6 +40,50 @@ const propertyService = {
         return properties.map(property => new Property(property));
     },
 
+    async getPropertiesByUserId(userId) {
+        const properties = await prisma.property.findMany({
+            where: { 
+                userId: userId 
+            }, 
+            include: {
+                images: {
+                    select: { id: true } 
+                },
+                user: { 
+                    select: { id: true, name: true, email: true } 
+                }
+            }
+        });
+    
+        if (!properties || properties.length === 0) {
+            throw new Error('Nenhum imóvel encontrado para este usuário');
+        }
+    
+        const propertiesWithRating = await Promise.all(
+            properties.map(async (propertyData) => {
+                const ratingAggregation = await prisma.propertyValuation.aggregate({
+                    _avg: {
+                        noteProperty: true,
+                    },
+                    where: {
+                        reserve: {
+                            propertyId: propertyData.id,
+                        },
+                    },
+                });
+    
+                const avgRating = ratingAggregation._avg.noteProperty; 
+
+                return new Property({
+                    ...propertyData,
+                    avgRating: avgRating 
+                });
+            })
+        );
+    
+        return propertiesWithRating; 
+    },
+
     async getPropertyById(id) {
         const property = await prisma.property.findUnique({
             where: { id },

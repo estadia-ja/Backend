@@ -24,6 +24,18 @@ const propertyController = {
         }
     },
 
+    async getMyProperties(req, res) {
+        try {
+            const userId = req.user.id;
+            
+            const properties = await propertyService.getPropertiesByUserId(userId);
+            
+            res.status(200).json(properties.map(p => p.toJSON()));
+        } catch (error) {
+            res.status(404).json({ error: error.message });
+        }
+    },
+
     async getById(req, res) {
         try {
             const { id } = req.params;

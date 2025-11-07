@@ -204,6 +204,42 @@ router.get('/', propertyController.getAll);
 
 /**
  * @swagger
+ * /property/my-properties:
+ *   get:
+ *     summary: Retorna todos os imóveis do usuário autenticado
+ *     tags: [Imóveis, Usuário]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: Lista de imóveis do usuário, cada um com sua nota média.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/PropertyWithRating'
+ *       '401':
+ *         description: Não autorizado (token não fornecido ou inválido).
+ *       '404':
+ *         description: Nenhum imóvel encontrado para este usuário.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Nenhum imóvel encontrado para este usuário"
+ */
+router.get(
+  "/my-properties",
+  authMiddleware,
+  propertyController.getMyProperties
+);
+
+/**
+ * @swagger
  * /property/available:
  *   get:
  *     summary: Busca imóveis disponíveis por período, estado e capacidade
