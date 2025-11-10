@@ -262,6 +262,25 @@ const propertyService = {
         return propertiesWithRating;
     },
 
+    async getReservations(propertyId) {
+        const reservations = await prisma.reserve.findMany({
+            where:{
+                propertyId: propertyId,
+                status:'CONFIRMADA',
+            },
+            select: {
+                id:true,
+                dateStart:true,
+                dateEnd: true,
+            }
+        });
+
+        if (!reservations) {
+            throw new Error("Nenhuma reserva encontrada");
+        }
+        return reservations;
+    },
+
     async updatePropertyData(propertyId, updateData, userId){
         const property = await prisma.property.findUnique({
             where: { id: propertyId }

@@ -95,6 +95,16 @@ const propertyController = {
         }
     },
 
+    async getReservations(req, res) {
+        try {
+            const {id} = req.params;
+            const reservations = await propertyService.getReservations(id);
+            res.status(200).json(reservations);
+        } catch (error) {
+            res.status(404).json({ error: error.message });
+        }
+    },
+
     async findRanked(req, res) {
         try {
             const properties = await propertyService.findPropertiesRankedByValuation();

@@ -207,7 +207,7 @@ router.get('/', propertyController.getAll);
  * /property/my-properties:
  *   get:
  *     summary: Retorna todos os imóveis do usuário autenticado
- *     tags: [Imóveis, Usuário]
+ *     tags: [Imóveis]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -393,6 +393,26 @@ router.get(
   '/:propertyId/valuations',
   propertyValuationController.getByProperty
 );
+
+/**
+ * @swagger
+ * /property/{id}/reservations:
+ *   get:
+ *     summary: Retorna todas as reservas de um imóvel
+ *     tags: [Imóveis, Reservas]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: Uma lista de reservas com 'dateStart' e 'dateEnd'.
+ *       '404':
+ *         description: Imóvel não encontrado.
+ */
+router.get('/:id/reservations', propertyController.getReservations);
 
 /**
  * @swagger
