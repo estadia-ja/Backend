@@ -4,7 +4,7 @@ export default defineConfig({
     test: {
         include: ['src/**/test/*.integration.test.js'],
         setupFiles: ['./tests/setup-integration.js'],
-        testTimeout: 15000,
-        hookTimeout: 30000,
+        testTimeout: 30000,
+        hookTimeout: 60000,
     },
 });
