@@ -24,7 +24,7 @@ const reserveService = {
         const existingReserve = await prisma.reserve.findFirst({
             where: {
                 propertyId: propertyId,
-                status: { not: 'CANCELADA' },
+                status: { not: 'CANCELADO' },
                 AND: [
                     { dateStart: { lt: dateEnd } },
                     { dateEnd: { gt: dateStart } }
