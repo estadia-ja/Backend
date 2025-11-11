@@ -58,7 +58,8 @@ const reserveService = {
             where: {
                 property: {
                     userId: ownerId
-                }
+                },
+                status: { not: 'CANCELADO' }
             },
             include: {
                 property: true,
@@ -74,7 +75,8 @@ const reserveService = {
     async getReservationsForUser(userId){
         const reservations = await prisma.reserve.findMany({
             where: {
-                userId: userId 
+                userId: userId,
+                status: { not: 'CANCELADO' }
             },
             include: {
                 property: true
@@ -111,7 +113,7 @@ const reserveService = {
             where: {
                 propertyId: reserve.propertyId,
                 id: { not: reserveId },
-                status: { not: 'CANCELADA' },
+                status: { not: 'CANCELADO' },
                 AND: [
                     { dateStart: { lt: newDateEnd } },
                     { dateEnd: { gt: newDateStart } }

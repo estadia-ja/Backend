@@ -23,7 +23,7 @@ describe('test reserve service', () => {
         vi.clearAllMocks();
     });
 
-    describe('createRserve', () => {
+    describe('createReserve', () => {
         const propertyId = 'prop-1';
         const userId = 'user-guest';
         const ownerId = 'user-owner';
@@ -83,7 +83,7 @@ describe('test reserve service', () => {
             const result = await reserveService.getReservationsForOwner(ownerId);
 
             expect(prisma.reserve.findMany).toHaveBeenCalledWith({
-                where: { property: { userId: 'owner-id' } },
+                where: { property: { userId: 'owner-id' }, status: { not: 'CANCELADO' } },
                 include: { property: true, user: true },
                 orderBy: { dateStart: 'asc' },
             });
@@ -101,7 +101,7 @@ describe('test reserve service', () => {
             const result = await reserveService.getReservationsForUser(userId);
 
             expect(prisma.reserve.findMany).toHaveBeenCalledWith({
-                where: { userId: 'user-id' },
+                where: { userId: 'user-id', status: { not: 'CANCELADO' } },
                 include: { property: true },
                 orderBy: { dateStart: 'asc' },
             });
