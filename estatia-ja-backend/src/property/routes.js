@@ -233,7 +233,7 @@ router.get('/', propertyController.getAll);
  *                   example: "Nenhum imóvel encontrado para este usuário"
  */
 router.get(
-  "/my-properties",
+  '/my-properties',
   authMiddleware,
   propertyController.getMyProperties
 );
@@ -337,7 +337,7 @@ router.get('/ranked-by-valuation', propertyController.findRanked);
  *                   type: string
  *                   example: "Nenhum imóvel encontrado nesta cidade"
  */
-router.get("/city/:city", propertyController.getByCity);
+router.get('/city/:city', propertyController.getByCity);
 
 /**
  * @swagger
@@ -362,7 +362,7 @@ router.get("/city/:city", propertyController.getByCity);
  *       '404':
  *         description: Imóvel não encontrado.
  */
-router.get("/:id", propertyController.getById);
+router.get('/:id', propertyController.getById);
 
 /**
  * @swagger

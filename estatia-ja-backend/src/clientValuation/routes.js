@@ -3,7 +3,7 @@ import clientValuationController from './controller.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 import { validateCreateClientValuation } from '../middlewares/clientValuationValidation.js';
 
-const router = Router({mergeParams: true});
+const router = Router({ mergeParams: true });
 
 /**
  * @swagger
@@ -52,10 +52,10 @@ const router = Router({mergeParams: true});
  *         description: "Conflito (o cliente já foi avaliado para esta reserva)."
  */
 router.post(
-    '/',
-    authMiddleware,
-    validateCreateClientValuation,
-    clientValuationController.create
+  '/',
+  authMiddleware,
+  validateCreateClientValuation,
+  clientValuationController.create
 );
 
 /**
@@ -82,10 +82,9 @@ router.post(
  *         description: "Avaliação não encontrada."
  */
 router.delete(
-    '/:valuationId',
-    authMiddleware,
-    clientValuationController.delete
+  '/:valuationId',
+  authMiddleware,
+  clientValuationController.delete
 );
-  
 
 export default router;

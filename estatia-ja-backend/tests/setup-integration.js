@@ -24,13 +24,15 @@ beforeAll(async () => {
   });
 
   try {
-    await adminPrisma.$executeRawUnsafe(`DROP SCHEMA IF EXISTS "${schemaName}" CASCADE;`);
+    await adminPrisma.$executeRawUnsafe(
+      `DROP SCHEMA IF EXISTS "${schemaName}" CASCADE;`
+    );
     await adminPrisma.$executeRawUnsafe(`CREATE SCHEMA "${schemaName}";`);
-    
+
     console.log(`[Worker ${workerId}]: Schema criado. Aplicando migrations...`);
-    
+
     execSync('npx prisma db push --skip-generate');
-    
+
     console.log(`[Worker ${workerId}]: Migrations prontas.`);
   } catch (e) {
     console.error(`[Worker ${workerId}]: Falha no setup do DB`, e);
@@ -46,7 +48,7 @@ afterEach(async () => {
   const tablesnames = await prisma.$queryRaw`
         SELECT tablename FROM pg_tables WHERE schemaname = ${schemaName}
     `;
-    
+
   const tables = tablesnames
     .map(({ tablename }) => tablename)
     .filter((name) => name !== '_prisma_migrations')
@@ -68,10 +70,12 @@ afterAll(async () => {
   const adminPrisma = new PrismaClient({
     datasources: { estadia_db: { url: originalDatabaseUrl } },
   });
-  
+
   try {
     console.log(`[Worker ${workerId}]: Removendo schema '${schemaName}'...`);
-    await adminPrisma.$executeRawUnsafe(`DROP SCHEMA IF EXISTS "${schemaName}" CASCADE;`);
+    await adminPrisma.$executeRawUnsafe(
+      `DROP SCHEMA IF EXISTS "${schemaName}" CASCADE;`
+    );
   } catch (e) {
     console.error(`[Worker ${workerId}]: Falha no teardown do DB`, e);
   } finally {

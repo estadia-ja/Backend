@@ -1,4 +1,7 @@
-import { createUserSchema, updateUserSchema } from '../validations/userValidation.js';
+import {
+  createUserSchema,
+  updateUserSchema,
+} from '../validations/userValidation.js';
 
 export const validateCreateUser = (req, res, next) => {
   const { error, value } = createUserSchema.validate(req.body);

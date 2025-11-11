@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach } from 'vitest';
 import request from 'supertest';
 import { app } from '../../app';
 import { prisma } from '../../database';
@@ -13,22 +13,20 @@ describe('User Routes - Integration Tests', () => {
     await prisma.property.deleteMany({});
     await prisma.phone.deleteMany({});
     await prisma.user.deleteMany({});
-  }); 
+  });
 
-  describe('post /user', () =>{
+  describe('post /user', () => {
     it('sholud create a new user', async () => {
       const userTest = {
         name: 'Pedro',
         email: 'pedro.test@example.com',
-        password: 'Password123', 
+        password: 'Password123',
         cpf: '111.222.333-44',
-        phones: ['(11) 99999-8888']
+        phones: ['(11) 99999-8888'],
       };
 
-      const response = await request(app)
-        .post('/user')
-        .send(userTest);
-      
+      const response = await request(app).post('/user').send(userTest);
+
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
       expect(response.body.email).toBe(userTest.email);
@@ -36,12 +34,11 @@ describe('User Routes - Integration Tests', () => {
       expect(response.body.phones).toHaveLength(1);
       expect(response.body.phones[0].phone).toBe(userTest.phones[0]);
 
-
       const userInDb = await prisma.user.findUnique({
         where: { email: userTest.email },
       });
       const phoneInDb = await prisma.phone.findFirst({
-        where: { userId: userInDb.id }
+        where: { userId: userInDb.id },
       });
       expect(userInDb).not.toBeNull();
       expect(phoneInDb).not.toBeNull();
@@ -52,12 +49,10 @@ describe('User Routes - Integration Tests', () => {
       const userInvalid = {
         name: 'Pedro',
         email: 'pedro.test@example.com',
-        password: 'Password123'
+        password: 'Password123',
       };
 
-      const response = await request(app)
-        .post('/user')
-        .send(userInvalid);
+      const response = await request(app).post('/user').send(userInvalid);
 
       expect(response.status).toBe(400);
       expect(response.body.error).toBeDefined();
@@ -80,9 +75,7 @@ describe('User Routes - Integration Tests', () => {
         cpf: '111.555.333-44',
       };
 
-      const response = await request(app)
-        .post('/user')
-        .send(newUser);
+      const response = await request(app).post('/user').send(newUser);
 
       expect(response.status).toBe(400);
       expect(response.body.error).toContain('Email ou CPF já cadastrado');
@@ -101,9 +94,11 @@ describe('User Routes - Integration Tests', () => {
         name: 'Maria',
         email: 'maria@example.com',
         password: 'Password12345',
-        cpf: '111.222.333-44', 
+        cpf: '111.222.333-44',
       };
-      const response = await request(app).post('/user').send(newUserWithSameCpf);
+      const response = await request(app)
+        .post('/user')
+        .send(newUserWithSameCpf);
 
       expect(response.status).toBe(400);
       expect(response.body.error).toContain('Email ou CPF já cadastrado');
@@ -117,7 +112,7 @@ describe('User Routes - Integration Tests', () => {
           name: 'Maria Teste',
           email: 'maria@test.com',
           password: 'Password456',
-          cpf: '987.654.321-00'
+          cpf: '987.654.321-00',
         },
       });
 
@@ -126,25 +121,25 @@ describe('User Routes - Integration Tests', () => {
           name: 'Pedro Teste',
           email: 'pedro@test.com',
           password: 'Password456',
-          cpf: '987.094.321-00'
+          cpf: '987.094.321-00',
         },
       });
 
       await prisma.phone.create({
         data: {
           phone: '(22) 22222-2222',
-          userId: user1.id
-        }
+          userId: user1.id,
+        },
       });
 
       await prisma.phone.create({
         data: {
           phone: '(64) 22376-2222',
-          userId: user2.id
-        }
+          userId: user2.id,
+        },
       });
 
-      const response = await request(app).get('/user')
+      const response = await request(app).get('/user');
 
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.status).toBe(200);
@@ -156,18 +151,19 @@ describe('User Routes - Integration Tests', () => {
   describe('get /user/:id', () => {
     it('should return a user', async () => {
       const createUser = await prisma.user.create({
-        data: { 
-          name: 'Pedro', 
-          email: 'pedro@test.com', 
-          password: '123', 
-          cpf: '123.123.123-12' },
+        data: {
+          name: 'Pedro',
+          email: 'pedro@test.com',
+          password: '123',
+          cpf: '123.123.123-12',
+        },
       });
 
-      await prisma.phone.create({ 
-        data: { phone: '(11) 12345-6789', userId: createUser.id } 
+      await prisma.phone.create({
+        data: { phone: '(11) 12345-6789', userId: createUser.id },
       });
 
-      const response = await request(app).get(`/user/${createUser.id}`)
+      const response = await request(app).get(`/user/${createUser.id}`);
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe(createUser.id);
@@ -190,8 +186,8 @@ describe('User Routes - Integration Tests', () => {
       const userTest = {
         name: 'Pedro',
         email: 'pedro.test@example.com',
-        password: 'Password123', 
-        cpf: '123.234.234-34'
+        password: 'Password123',
+        cpf: '123.234.234-34',
       };
 
       const createUser = await prisma.user.create({
@@ -199,16 +195,16 @@ describe('User Routes - Integration Tests', () => {
       });
 
       const userUpdate = {
-        email: 'pedro.test.update@example.com'
+        email: 'pedro.test.update@example.com',
       };
 
       const response = await request(app)
         .put(`/user/${createUser.id}`)
-        .send(userUpdate)
+        .send(userUpdate);
 
       expect(response.status).toBe(200);
       expect(response.body.email).toBe(userUpdate.email);
-      const userInDb = await prisma.user.findUnique({ 
+      const userInDb = await prisma.user.findUnique({
         where: { id: createUser.id },
       });
       expect(userInDb.email).toBe(userUpdate.email);
@@ -216,17 +212,20 @@ describe('User Routes - Integration Tests', () => {
 
     it('should update a user and replace their phones', async () => {
       const userTest = await prisma.user.create({
-        data: { 
-          name: 'Pedro', 
-          email: 'pedro@test.com', 
-          password: '123', 
-          cpf: '123.123.123-12' },
+        data: {
+          name: 'Pedro',
+          email: 'pedro@test.com',
+          password: '123',
+          cpf: '123.123.123-12',
+        },
       });
-      await prisma.phone.create({ data: { phone: '(11) 11111-1111', userId: userTest.id } });
+      await prisma.phone.create({
+        data: { phone: '(11) 11111-1111', userId: userTest.id },
+      });
 
       const updateUser = {
         name: 'Pedro Atualizado',
-        phones: ['(99) 99999-9999']
+        phones: ['(99) 99999-9999'],
       };
 
       const response = await request(app)
@@ -237,7 +236,9 @@ describe('User Routes - Integration Tests', () => {
       expect(response.body.name).toBe('Pedro Atualizado');
       expect(response.body.phones[0].phone).toBe('(99) 99999-9999');
 
-      const phonesInDb = await prisma.phone.findMany({ where: { userId: userTest.id } });
+      const phonesInDb = await prisma.phone.findMany({
+        where: { userId: userTest.id },
+      });
       expect(phonesInDb).toHaveLength(1);
       expect(phonesInDb[0].phone).toBe('(99) 99999-9999');
     });
@@ -245,11 +246,11 @@ describe('User Routes - Integration Tests', () => {
     it('should reutrna erro if user does not exist', async () => {
       const noExistentId = 'clxjhg82z00001234abcd1234';
       const userUpdate = {
-        email: 'pedro.test.update@example.com'
+        email: 'pedro.test.update@example.com',
       };
       const response = await request(app)
         .put(`/user/${noExistentId}`)
-        .send(userUpdate)
+        .send(userUpdate);
 
       expect(response.status).toBe(400);
       expect(response.body.error).toContain('Usuário não encontrado');
@@ -261,45 +262,54 @@ describe('User Routes - Integration Tests', () => {
           name: 'Pedro Teste',
           email: 'pedro@test.com',
           password: 'Password123',
-          cpf: '123.234.234-34'
+          cpf: '123.234.234-34',
         },
       });
-    
+
       const userB = await prisma.user.create({
         data: {
           name: 'Maria Teste',
           email: 'maria@test.com',
           password: 'Password456',
-          cpf: '123.768.234-34'
+          cpf: '123.768.234-34',
         },
       });
-    
+
       const userUpdate = {
         email: userB.email,
       };
-    
+
       const response = await request(app)
         .put(`/user/${userA.id}`)
         .send(userUpdate);
-    
-      expect(response.status).toBe(400)
-      expect(response.body.error).toContain('Email já esta em uso')
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toContain('Email já esta em uso');
     });
   });
 
   describe('delete /user/:id', () => {
     it('should delete a user', async () => {
       const user = await prisma.user.create({
-        data: { name: 'Pedro', email: 'pedro@test.com', password: '123', cpf: '123.123.123-12' },
+        data: {
+          name: 'Pedro',
+          email: 'pedro@test.com',
+          password: '123',
+          cpf: '123.123.123-12',
+        },
       });
-      await prisma.phone.create({ data: { phone: '(11) 11111-1111', userId: user.id } });
+      await prisma.phone.create({
+        data: { phone: '(11) 11111-1111', userId: user.id },
+      });
 
       const response = await request(app).delete(`/user/${user.id}`);
 
       expect(response.status).toBe(204);
       const userInDb = await prisma.user.findUnique({ where: { id: user.id } });
       // MUDANÇA: Verificar também se os telefones foram deletados (por causa do onDelete: Cascade).
-      const phonesInDb = await prisma.phone.findMany({ where: { userId: user.id } });
+      const phonesInDb = await prisma.phone.findMany({
+        where: { userId: user.id },
+      });
       expect(userInDb).toBeNull();
       expect(phonesInDb).toHaveLength(0);
     });
@@ -313,4 +323,3 @@ describe('User Routes - Integration Tests', () => {
     });
   });
 });
-

@@ -50,11 +50,10 @@ const router = Router({ mergeParams: true });
  *         description: Conflito (a reserva já foi paga).
  */
 router.post(
-    '/',
-    authMiddleware,
-    validateCreatePayment,
-    paymentController.create
+  '/',
+  authMiddleware,
+  validateCreatePayment,
+  paymentController.create
 );
-  
+
 export default router;
-  

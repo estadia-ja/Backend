@@ -1,46 +1,46 @@
 import swaggerJSDoc from 'swagger-jsdoc';
 
 const swaggerDefinition = {
-    openapi: '3.0.0',
-    info: {
-        title: 'Estadia ja',
-        version: '1.0.0',
-        description: 'Documentação da api'
+  openapi: '3.0.0',
+  info: {
+    title: 'Estadia ja',
+    version: '1.0.0',
+    description: 'Documentação da api',
+  },
+  servers: [
+    {
+      url: 'http://localhost:3000',
+      description: 'Servidor de desenvolvimento',
     },
-    servers: [
-        {
-            url: 'http://localhost:3000',
-            description: 'Servidor de desenvolvimento'
-        },
-    ],
-    components:{
-        securitySchemes:{
-            bearerAuth: {
-                type: 'http',
-                scheme: 'bearer',
-                bearerFormat: 'JWT',
-            }
-        }
+  ],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
     },
-    tags: [
-        {
-            name: 'Usuários',
-            description: 'Gerenciamento das rotas de usuário'
-        }
-    ],
+  },
+  tags: [
+    {
+      name: 'Usuários',
+      description: 'Gerenciamento das rotas de usuário',
+    },
+  ],
 };
 
 const options = {
-    swaggerDefinition,
-    apis: [
-        './src/user/routes.js',
-        './src/property/routes.js',
-        './src/reserve/routes.js',
-        './src/propertyValuation/routes.js',
-        './src/clientValuation/routes.js',
-        './src/payment/routes.js'
-    ],
-  };
+  swaggerDefinition,
+  apis: [
+    './src/user/routes.js',
+    './src/property/routes.js',
+    './src/reserve/routes.js',
+    './src/propertyValuation/routes.js',
+    './src/clientValuation/routes.js',
+    './src/payment/routes.js',
+  ],
+};
 
 const swaggerSpec = swaggerJSDoc(options);
 

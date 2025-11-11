@@ -1,7 +1,10 @@
-import { Router } from "express";
-import multer from "multer";
-import userController from "./controller.js";
-import { validateCreateUser, validateUpdateUser } from "../middlewares/validation.js";
+import { Router } from 'express';
+import multer from 'multer';
+import userController from './controller.js';
+import {
+  validateCreateUser,
+  validateUpdateUser,
+} from '../middlewares/validation.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -64,7 +67,7 @@ const upload = multer({ storage: multer.memoryStorage() });
  *       400:
  *         description: Erro na validação dos dados.
  */
-router.post("/", validateCreateUser, userController.create);
+router.post('/', validateCreateUser, userController.create);
 
 /**
  * @swagger
@@ -76,7 +79,7 @@ router.post("/", validateCreateUser, userController.create);
  *       200:
  *         description: Lista de usuários obtida com sucesso.
  */
-router.get("/", userController.getAll);
+router.get('/', userController.getAll);
 
 /**
  * @swagger
@@ -96,7 +99,7 @@ router.get("/", userController.getAll);
  *       404:
  *         description: Usuário não encontrado.
  */
-router.get("/:id", userController.getById);
+router.get('/:id', userController.getById);
 
 /**
  * @swagger
@@ -123,11 +126,8 @@ router.get("/:id", userController.getById);
  *       '404':
  *         description: Usuário não encontrado.
  */
-router.get(
-    '/:id/client-valuations',
-    userController.getClientValuations
-);
-  
+router.get('/:id/client-valuations', userController.getClientValuations);
+
 /**
  * @swagger
  * /user/{id}:
@@ -166,7 +166,7 @@ router.get(
  *       404:
  *         description: Usuário não encontrado.
  */
-router.put("/:id", validateUpdateUser, userController.update);
+router.put('/:id', validateUpdateUser, userController.update);
 
 /**
  * @swagger
@@ -186,7 +186,7 @@ router.put("/:id", validateUpdateUser, userController.update);
  *       404:
  *         description: Usuário não encontrado.
  */
-router.delete("/:id", userController.delete);
+router.delete('/:id', userController.delete);
 
 /**
  * @swagger
@@ -217,7 +217,7 @@ router.delete("/:id", userController.delete);
  *       400:
  *         description: Nenhum arquivo enviado
  */
-router.post("/:id/upload", upload.single("image"), userController.uploadImage);
+router.post('/:id/upload', upload.single('image'), userController.uploadImage);
 
 /**
  * @swagger
@@ -240,6 +240,6 @@ router.post("/:id/upload", upload.single("image"), userController.uploadImage);
  *       404:
  *         description: Usuário ou imagem não encontrada
  */
-router.get("/:id/image", userController.getImage);
+router.get('/:id/image', userController.getImage);
 
 export default router;

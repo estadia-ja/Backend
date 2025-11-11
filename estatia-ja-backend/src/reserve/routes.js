@@ -1,7 +1,10 @@
 import { Router } from 'express';
 import reserveController from './controller.js';
-import { authMiddleware} from '../middlewares/authMiddleware.js'
-import { validateCreateReserve, validateUpdateReserve } from '../middlewares/reserveValidation.js'
+import { authMiddleware } from '../middlewares/authMiddleware.js';
+import {
+  validateCreateReserve,
+  validateUpdateReserve,
+} from '../middlewares/reserveValidation.js';
 import propertyValuationRoutes from '../propertyValuation/routes.js';
 import clientValuationRoutes from '../clientValuation/routes.js';
 import paymentRoutes from '../payment/routes.js';
@@ -67,10 +70,10 @@ const router = Router({ mergeParams: true });
  *         description: Conflito de disponibilidade (imóvel já reservado para as datas).
  */
 router.post(
-    '/',
-    authMiddleware,
-    validateCreateReserve, 
-    reserveController.create
+  '/',
+  authMiddleware,
+  validateCreateReserve,
+  reserveController.create
 );
 
 /**
@@ -95,11 +98,7 @@ router.post(
  *       '403':
  *         description: Acesso proibido.
  */
-router.get(
-    '/owner',
-    authMiddleware,
-    reserveController.getOwnerReservations
-);  
+router.get('/owner', authMiddleware, reserveController.getOwnerReservations);
 
 /**
  * @swagger
@@ -122,11 +121,11 @@ router.get(
  *         description: Não autorizado.
  */
 router.get(
-    '/my-reservations',
-    authMiddleware,
-    reserveController.getUserReservations
+  '/my-reservations',
+  authMiddleware,
+  reserveController.getUserReservations
 );
-  
+
 /**
  * @swagger
  * /reserve/{reserveId}:
@@ -161,10 +160,10 @@ router.get(
  *         description: "Conflito de disponibilidade para as novas datas."
  */
 router.put(
-    '/:reserveId',
-    authMiddleware,
-    validateUpdateReserve,
-    reserveController.update
+  '/:reserveId',
+  authMiddleware,
+  validateUpdateReserve,
+  reserveController.update
 );
 
 /**
@@ -192,15 +191,10 @@ router.put(
  *       '404':
  *         description: "Reserva não encontrada."
  */
-router.delete(
-    '/:reserveId',
-    authMiddleware,
-    reserveController.cancel
-);
+router.delete('/:reserveId', authMiddleware, reserveController.cancel);
 
 router.use('/:reserveId/property-valuation', propertyValuationRoutes);
 router.use('/:reserveId/client-valuation', clientValuationRoutes);
 router.use('/:reserveId/payment', paymentRoutes);
 
 export default router;
-  

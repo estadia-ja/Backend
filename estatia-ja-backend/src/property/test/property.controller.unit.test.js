@@ -4,338 +4,406 @@ import propertyService from '../service.js';
 import Property from '../model.js';
 
 vi.mock('../service.js', () => ({
-    default: {
-        createProperty: vi.fn(),
-        getAllProperties: vi.fn(),
-        getPropertyById: vi.fn(),
-        getPropertyByCity: vi.fn(),
-        deleleProperty: vi.fn(),
-        updatePropertyData: vi.fn(),
-        updatePropertyImages: vi.fn(),
-        findAvailableProperties: vi.fn(),
-        findPropertiesRankedByValuation: vi.fn(),
-        getAllImagesForProperty: vi.fn(),
-    }
+  default: {
+    createProperty: vi.fn(),
+    getAllProperties: vi.fn(),
+    getPropertyById: vi.fn(),
+    getPropertyByCity: vi.fn(),
+    deleleProperty: vi.fn(),
+    updatePropertyData: vi.fn(),
+    updatePropertyImages: vi.fn(),
+    findAvailableProperties: vi.fn(),
+    findPropertiesRankedByValuation: vi.fn(),
+    getAllImagesForProperty: vi.fn(),
+  },
 }));
 
 describe('test property controller', () => {
-    let mockReq;
-    let mockRes;
+  let mockReq;
+  let mockRes;
 
-    beforeEach(() => {
-        vi.clearAllMocks(); 
-        
-        mockRes = {
-            status: vi.fn().mockReturnThis(),
-            json: vi.fn(),
-            send: vi.fn(), 
-        };
-        
-        mockReq = {};
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    mockRes = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+      send: vi.fn(),
+    };
+
+    mockReq = {};
+  });
+
+  describe('create', () => {
+    it('should create a property and return it with status 201', async () => {
+      const propertyData = { type: 'Apartamento', description: 'Novo ap' };
+      const mockFiles = [{ buffer: Buffer.from('fake-image-data') }];
+      const mockCreatedProperty = new Property({
+        id: 'new-prop-id',
+        ...propertyData,
+      });
+
+      propertyService.createProperty.mockResolvedValue(mockCreatedProperty);
+
+      mockReq.validatedData = propertyData;
+      mockReq.files = mockFiles;
+      mockReq.user = { id: 'fake-user-id' };
+
+      await propertyController.create(mockReq, mockRes);
+
+      expect(propertyService.createProperty).toHaveBeenCalledWith(
+        propertyData,
+        [mockFiles[0].buffer],
+        'fake-user-id'
+      );
+      expect(mockRes.status).toHaveBeenCalledWith(201);
+      expect(mockRes.json).toHaveBeenCalledWith(mockCreatedProperty.toJSON());
+    });
+  });
+
+  describe('getById', () => {
+    it('should return a property', async () => {
+      const mockProperty = new Property({
+        id: 'test-id',
+        type: 'Casa',
+        avgRating: 4.5,
+      });
+      propertyService.getPropertyById.mockResolvedValue(mockProperty);
+      mockReq.params = { id: 'test-id' };
+
+      await propertyController.getById(mockReq, mockRes);
+
+      expect(propertyService.getPropertyById).toHaveBeenCalledWith('test-id');
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith(mockProperty.toJSON());
     });
 
-    describe('create', () => {
-        it('should create a property and return it with status 201', async () => {
-           const propertyData = { type: 'Apartamento', description: 'Novo ap' };
-            const mockFiles = [{ buffer: Buffer.from('fake-image-data') }];
-            const mockCreatedProperty = new Property({ id: 'new-prop-id', ...propertyData });
-            
-            propertyService.createProperty.mockResolvedValue(mockCreatedProperty);
-            
-            mockReq.validatedData = propertyData;
-            mockReq.files = mockFiles;
-            mockReq.user = { id: 'fake-user-id' };
+    it('should return a error 404 if property does not exist', async () => {
+      propertyService.getPropertyById.mockRejectedValue(
+        new Error('Imóvel não existe')
+      );
+      mockReq.params = { id: 'not-found-id' };
 
-            await propertyController.create(mockReq, mockRes);
+      await propertyController.getById(mockReq, mockRes);
 
-            expect(propertyService.createProperty).toHaveBeenCalledWith(
-                propertyData,
-                [mockFiles[0].buffer], 
-                'fake-user-id'
-            );
-            expect(mockRes.status).toHaveBeenCalledWith(201);
-            expect(mockRes.json).toHaveBeenCalledWith(mockCreatedProperty.toJSON());
-        });
+      expect(mockRes.status).toHaveBeenCalledWith(404);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Imóvel não existe' });
+    });
+  });
+
+  describe('getAll', () => {
+    it('should return a list of all properties with status 200', async () => {
+      const mockProperties = [
+        new Property({ id: 'prop-1', type: 'Casa' }),
+        new Property({ id: 'prop-2', type: 'Apartamento' }),
+      ];
+
+      propertyService.getAllProperties.mockResolvedValue(mockProperties);
+
+      await propertyController.getAll(mockReq, mockRes);
+
+      expect(propertyService.getAllProperties).toHaveBeenCalledOnce();
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith(
+        mockProperties.map((p) => p.toJSON())
+      );
     });
 
-    describe('getById', () => {
-        it('should return a property', async () => {
-            const mockProperty = new Property({ id: 'test-id', type: 'Casa', avgRating: 4.5});
-            propertyService.getPropertyById.mockResolvedValue(mockProperty);
-            mockReq.params = { id: 'test-id' };
-    
-            await propertyController.getById(mockReq, mockRes);
-    
-            expect(propertyService.getPropertyById).toHaveBeenCalledWith('test-id');
-            expect(mockRes.status).toHaveBeenCalledWith(200);
-            expect(mockRes.json).toHaveBeenCalledWith(mockProperty.toJSON());
-        });
+    it('should return status 500 on service error', async () => {
+      propertyService.getAllProperties.mockRejectedValue(
+        new Error('Database error')
+      );
 
-        it('should return a error 404 if property does not exist', async () => {
-            propertyService.getPropertyById.mockRejectedValue(new Error('Imóvel não existe'));
-            mockReq.params = { id: 'not-found-id' };
+      await propertyController.getAll(mockReq, mockRes);
 
-            await propertyController.getById(mockReq, mockRes);
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Database error' });
+    });
+  });
 
-            expect(mockRes.status).toHaveBeenCalledWith(404);
-            expect(mockRes.json).toHaveBeenCalledWith({ error: 'Imóvel não existe' });
-        });
+  describe('getAllImages', () => {
+    it('should return a list of images for a property with status 200', async () => {
+      const mockImages = [{ id: 'img-1', image: '...' }];
+      propertyService.getAllImagesForProperty.mockResolvedValue(mockImages);
+      mockReq.params = { propertyId: 'test-prop-id' };
+
+      await propertyController.getAllImages(mockReq, mockRes);
+
+      expect(propertyService.getAllImagesForProperty).toHaveBeenCalledWith(
+        'test-prop-id'
+      );
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith(mockImages);
     });
 
-    describe('getAll', () => {
-        it('should return a list of all properties with status 200', async () => {
-            const mockProperties = [
-                new Property({ id: 'prop-1', type: 'Casa' }),
-                new Property({ id: 'prop-2', type: 'Apartamento' }),
-            ];
-    
-            propertyService.getAllProperties.mockResolvedValue(mockProperties);
+    it('should return status 404 if service throws an error', async () => {
+      propertyService.getAllImagesForProperty.mockRejectedValue(
+        new Error('Imóvel não existe')
+      );
+      mockReq.params = { propertyId: 'not-exist-id' };
 
-            await propertyController.getAll(mockReq, mockRes);
+      await propertyController.getAllImages(mockReq, mockRes);
 
-            expect(propertyService.getAllProperties).toHaveBeenCalledOnce();
-            expect(mockRes.status).toHaveBeenCalledWith(200);
-            expect(mockRes.json).toHaveBeenCalledWith(mockProperties.map(p => p.toJSON()));
-        });
+      expect(mockRes.status).toHaveBeenCalledWith(404);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Imóvel não existe' });
+    });
+  });
 
-        it('should return status 500 on service error', async () => {
-            propertyService.getAllProperties.mockRejectedValue(new Error('Database error'));
-    
-            await propertyController.getAll(mockReq, mockRes);
-    
-            expect(mockRes.status).toHaveBeenCalledWith(500);
-            expect(mockRes.json).toHaveBeenCalledWith({ error: 'Database error' });
-        });
+  describe('findAvailable', () => {
+    it('should return available properties with status 200 (dates only)', async () => {
+      const mockProperties = [{ id: 'prop-1' }];
+      const dateStart = '2025-12-01';
+      const dateEnd = '2025-12-10';
+
+      propertyService.findAvailableProperties.mockResolvedValue(mockProperties);
+      mockReq.query = { dateStart, dateEnd };
+
+      await propertyController.findAvailable(mockReq, mockRes);
+
+      expect(propertyService.findAvailableProperties).toHaveBeenCalledWith(
+        dateStart,
+        dateEnd,
+        undefined,
+        undefined
+      );
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith(mockProperties);
     });
 
-    describe('getAllImages', () => {
-        it('should return a list of images for a property with status 200', async () => {
-            const mockImages = [{ id: 'img-1', image: '...' }];
-            propertyService.getAllImagesForProperty.mockResolvedValue(mockImages);
-            mockReq.params = { propertyId: 'test-prop-id'};
+    it('should call service with all filters (dates, state, guests)', async () => {
+      const mockProperties = [{ id: 'prop-2' }];
+      const dateStart = '2025-12-01';
+      const dateEnd = '2025-12-10';
+      const state = 'SP';
+      const guests = '4';
 
-            await propertyController.getAllImages(mockReq, mockRes);
+      propertyService.findAvailableProperties.mockResolvedValue(mockProperties);
+      mockReq.query = { dateStart, dateEnd, state, guests };
 
-            expect(propertyService.getAllImagesForProperty).toHaveBeenCalledWith('test-prop-id');
-            expect(mockRes.status).toHaveBeenCalledWith(200);
-            expect(mockRes.json).toHaveBeenCalledWith(mockImages);
-        });
+      await propertyController.findAvailable(mockReq, mockRes);
 
-        it('should return status 404 if service throws an error', async () => {
-            propertyService.getAllImagesForProperty.mockRejectedValue(new Error('Imóvel não existe'));
-            mockReq.params = {propertyId: 'not-exist-id'};
-
-            await propertyController.getAllImages(mockReq,mockRes);
-            
-            expect(mockRes.status).toHaveBeenCalledWith(404);
-            expect(mockRes.json).toHaveBeenCalledWith({ error: 'Imóvel não existe' });
-        });
+      expect(propertyService.findAvailableProperties).toHaveBeenCalledWith(
+        dateStart,
+        dateEnd,
+        state,
+        guests
+      );
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith(mockProperties);
     });
 
-    describe('findAvailable', () => {
-        it('should return available properties with status 200 (dates only)', async () => {
-            const mockProperties = [{ id: 'prop-1' }];
-            const dateStart = '2025-12-01';
-            const dateEnd = '2025-12-10';
-            
-            propertyService.findAvailableProperties.mockResolvedValue(mockProperties);
-            mockReq.query = { dateStart, dateEnd };
-    
-            await propertyController.findAvailable(mockReq, mockRes);
-    
-            expect(propertyService.findAvailableProperties).toHaveBeenCalledWith(
-                dateStart, 
-                dateEnd, 
-                undefined, 
-                undefined 
-            );
-            expect(mockRes.status).toHaveBeenCalledWith(200);
-            expect(mockRes.json).toHaveBeenCalledWith(mockProperties);
-        });
-    
-        it('should call service with all filters (dates, state, guests)', async () => {
-            const mockProperties = [{ id: 'prop-2' }];
-            const dateStart = '2025-12-01';
-            const dateEnd = '2025-12-10';
-            const state = 'SP';
-            const guests = '4';
-            
-            propertyService.findAvailableProperties.mockResolvedValue(mockProperties);
-            mockReq.query = { dateStart, dateEnd, state, guests };
-    
-            await propertyController.findAvailable(mockReq, mockRes);
-    
-            expect(propertyService.findAvailableProperties).toHaveBeenCalledWith(
-                dateStart, 
-                dateEnd, 
-                state, 
-                guests
-            );
-            expect(mockRes.status).toHaveBeenCalledWith(200);
-            expect(mockRes.json).toHaveBeenCalledWith(mockProperties);
-        });
-    
-        it('should return 400 if dates are missing', async () => {
-            propertyService.findAvailableProperties.mockRejectedValue(new Error("as datas de início e fim são obrigatórias."));
-            mockReq.query = { dateStart: '2025-12-01' };
-    
-            await propertyController.findAvailable(mockReq, mockRes);
-            
-            expect(mockRes.status).toHaveBeenCalledWith(400);
-            expect(mockRes.json).toHaveBeenCalledWith({ error: "as datas de início e fim são obrigatórias." });
-        });
+    it('should return 400 if dates are missing', async () => {
+      propertyService.findAvailableProperties.mockRejectedValue(
+        new Error('as datas de início e fim são obrigatórias.')
+      );
+      mockReq.query = { dateStart: '2025-12-01' };
+
+      await propertyController.findAvailable(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        error: 'as datas de início e fim são obrigatórias.',
+      });
+    });
+  });
+
+  describe('getByCity', () => {
+    it('should return a list of plain properties with status 200', async () => {
+      const mockPlainProperties = [
+        { id: 'prop-1', type: 'Casa', city: 'São Paulo', avgRating: 4.0 },
+        {
+          id: 'prop-2',
+          type: 'Apartamento',
+          city: 'São Paulo',
+          avgRating: 4.5,
+        },
+      ];
+
+      propertyService.getPropertyByCity.mockResolvedValue(mockPlainProperties);
+
+      mockReq.params = { city: 'São Paulo' };
+
+      await propertyController.getByCity(mockReq, mockRes);
+
+      expect(propertyService.getPropertyByCity).toHaveBeenCalledWith(
+        'São Paulo'
+      );
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith(mockPlainProperties);
     });
 
-    describe('getByCity', () => {
-    
-        it('should return a list of plain properties with status 200', async () => {
-            const mockPlainProperties = [
-                { id: 'prop-1', type: 'Casa', city:"São Paulo", avgRating: 4.0 },
-                { id: 'prop-2', type: 'Apartamento', city:"São Paulo", avgRating: 4.5 },
-            ];
-    
-            propertyService.getPropertyByCity.mockResolvedValue(mockPlainProperties);
-    
-            mockReq.params = { city: "São Paulo" };
-    
-            await propertyController.getByCity(mockReq, mockRes);
-    
-            expect(propertyService.getPropertyByCity).toHaveBeenCalledWith("São Paulo");
-            expect(mockRes.status).toHaveBeenCalledWith(200);
-            expect(mockRes.json).toHaveBeenCalledWith(mockPlainProperties);
-        });
-    
-        it('should return status 404 on service error', async () => {
-            const errorMessage = 'Nenhum imóvel encontrado';
-            
-            propertyService.getPropertyByCity.mockRejectedValue(new Error(errorMessage));
-    
-            mockReq.params = { city: "CidadeInexistente" };
-    
-            await propertyController.getByCity(mockReq, mockRes);
-    
-            expect(mockRes.status).toHaveBeenCalledWith(404);
-            expect(mockRes.json).toHaveBeenCalledWith({ error: errorMessage });
-        });
+    it('should return status 404 on service error', async () => {
+      const errorMessage = 'Nenhum imóvel encontrado';
+
+      propertyService.getPropertyByCity.mockRejectedValue(
+        new Error(errorMessage)
+      );
+
+      mockReq.params = { city: 'CidadeInexistente' };
+
+      await propertyController.getByCity(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(404);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: errorMessage });
+    });
+  });
+
+  describe('findRanked', () => {
+    it('should return ranked properties with status 200', async () => {
+      const mockProperties = [new Property({ id: 'prop-1', avgRating: 5 })];
+      propertyService.findPropertiesRankedByValuation.mockResolvedValue(
+        mockProperties
+      );
+
+      await propertyController.findRanked(mockReq, mockRes);
+
+      expect(
+        propertyService.findPropertiesRankedByValuation
+      ).toHaveBeenCalledOnce();
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith(mockProperties);
+    });
+  });
+
+  describe('updateData', () => {
+    it('should update property data and return it with status 200', async () => {
+      const updateData = { description: 'Nova descrição' };
+      const mockUpdatedProperty = new Property({
+        id: 'prop-id',
+        description: 'Nova descrição',
+      });
+      propertyService.updatePropertyData.mockResolvedValue(mockUpdatedProperty);
+      mockReq.params = { id: 'prop-id' };
+      mockReq.user = { id: 'user-id' };
+      mockReq.body = updateData;
+
+      await propertyController.updateData(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith(mockUpdatedProperty);
+      expect(propertyService.updatePropertyData).toHaveBeenCalledWith(
+        'prop-id',
+        updateData,
+        'user-id'
+      );
     });
 
-    describe('findRanked', () => {
-        it('should return ranked properties with status 200', async () => {
-            const mockProperties = [new Property({ id: 'prop-1', avgRating: 5 })];
-            propertyService.findPropertiesRankedByValuation.mockResolvedValue(mockProperties);
+    it('should return status 403 for authorization errors', async () => {
+      propertyService.updatePropertyData.mockRejectedValue(
+        new Error('Ação não autorizada')
+      );
+      mockReq.params = { id: 'prop-id' };
+      mockReq.user = { id: 'wrong-user-id' };
+      mockReq.body = {};
 
-            await propertyController.findRanked(mockReq, mockRes);
+      await propertyController.updateData(mockReq, mockRes);
 
-            expect(propertyService.findPropertiesRankedByValuation).toHaveBeenCalledOnce();
-            expect(mockRes.status).toHaveBeenCalledWith(200);
-            expect(mockRes.json).toHaveBeenCalledWith(mockProperties);
-        });
+      expect(mockRes.status).toHaveBeenCalledWith(403);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        error: 'Ação não autorizada',
+      });
     });
 
-    describe('updateData', () => {
-        it('should update property data and return it with status 200', async () => {
-            const updateData = { description: 'Nova descrição' };
-            const mockUpdatedProperty = new Property({ id: 'prop-id', description: 'Nova descrição' });
-            propertyService.updatePropertyData.mockResolvedValue(mockUpdatedProperty);
-            mockReq.params = { id: 'prop-id' };
-            mockReq.user = { id: 'user-id' };
-            mockReq.body = updateData;
+    it('should return status 404 if property to update does not exist', async () => {
+      propertyService.updatePropertyData.mockRejectedValue(
+        new Error('Imóvel não existe')
+      );
+      mockReq.params = { id: 'prop-id' };
+      mockReq.user = { id: 'wrong-user-id' };
+      mockReq.body = {};
 
-            await propertyController.updateData(mockReq,mockRes);
+      await propertyController.updateData(mockReq, mockRes);
 
-            expect(mockRes.status).toHaveBeenCalledWith(200);
-            expect(mockRes.json).toHaveBeenCalledWith(mockUpdatedProperty);
-            expect(propertyService.updatePropertyData).toHaveBeenCalledWith('prop-id', updateData, 'user-id');
-        });
+      expect(mockRes.status).toHaveBeenCalledWith(404);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Imóvel não existe' });
+    });
+  });
 
-        it('should return status 403 for authorization errors', async () => {
-            propertyService.updatePropertyData.mockRejectedValue(new Error('Ação não autorizada'));
-            mockReq.params = { id: 'prop-id' };
-            mockReq.user = { id: 'wrong-user-id' };
-            mockReq.body = {};
-    
-            await propertyController.updateData(mockReq, mockRes);
-    
-            expect(mockRes.status).toHaveBeenCalledWith(403);
-            expect(mockRes.json).toHaveBeenCalledWith({ error: 'Ação não autorizada' });
-        });
+  describe('updateImages', () => {
+    it('should update property images and return the property with status 200', async () => {
+      const mockFiles = [{ buffer: Buffer.from('new-image') }];
+      const mockUpdatedProperty = new Property({
+        id: 'prop-id',
+        images: [{ id: 'new-img-id' }],
+      });
+      propertyService.updatePropertyImages.mockResolvedValue(
+        mockUpdatedProperty
+      );
+      mockReq.params = { id: 'prop-id' };
+      mockReq.user = { id: 'user-id' };
+      mockReq.files = mockFiles;
 
-        it('should return status 404 if property to update does not exist', async () => {
-            propertyService.updatePropertyData.mockRejectedValue(new Error('Imóvel não existe'));
-            mockReq.params = { id: 'prop-id' };
-            mockReq.user = { id: 'wrong-user-id' };
-            mockReq.body = {};
-    
-            await propertyController.updateData(mockReq, mockRes);
-    
-            expect(mockRes.status).toHaveBeenCalledWith(404);
-            expect(mockRes.json).toHaveBeenCalledWith({ error: 'Imóvel não existe' });
-        });
+      await propertyController.updateImages(mockReq, mockRes);
+
+      expect(propertyService.updatePropertyImages).toHaveBeenCalledWith(
+        'prop-id',
+        [mockFiles[0].buffer],
+        'user-id'
+      );
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith(mockUpdatedProperty);
     });
 
-    describe('updateImages', () => {
-        it('should update property images and return the property with status 200', async () => {
-            const mockFiles = [{ buffer: Buffer.from('new-image') }];
-            const mockUpdatedProperty = new Property({ id: 'prop-id', images: [{ id: 'new-img-id' }] });
-            propertyService.updatePropertyImages.mockResolvedValue(mockUpdatedProperty);
-            mockReq.params = { id: 'prop-id' };
-            mockReq.user = { id: 'user-id' };
-            mockReq.files = mockFiles;
+    it('should return status 403 for authorization errors', async () => {
+      propertyService.updatePropertyImages.mockRejectedValue(
+        new Error('Ação não autorizada')
+      );
+      mockReq.params = { id: 'prop-id' };
+      mockReq.user = { id: 'wrong-user-id' };
+      mockReq.body = {};
 
-            await propertyController.updateImages(mockReq, mockRes);
+      await propertyController.updateImages(mockReq, mockRes);
 
-            expect(propertyService.updatePropertyImages).toHaveBeenCalledWith('prop-id', [mockFiles[0].buffer], 'user-id');
-            expect(mockRes.status).toHaveBeenCalledWith(200);
-            expect(mockRes.json).toHaveBeenCalledWith(mockUpdatedProperty);
-        });
-        
-        it('should return status 403 for authorization errors', async () => {
-            propertyService.updatePropertyImages.mockRejectedValue(new Error('Ação não autorizada'));
-            mockReq.params = { id: 'prop-id' };
-            mockReq.user = { id: 'wrong-user-id' };
-            mockReq.body = {};
-    
-            await propertyController.updateImages(mockReq, mockRes);
-    
-            expect(mockRes.status).toHaveBeenCalledWith(403);
-            expect(mockRes.json).toHaveBeenCalledWith({ error: 'Ação não autorizada' });
-        });
-
-        it('should return status 404 if property to update does not exist', async () => {
-            propertyService.updatePropertyImages.mockRejectedValue(new Error('Imóvel não existe'));
-            mockReq.params = { id: 'prop-id' };
-            mockReq.user = { id: 'wrong-user-id' };
-            mockReq.body = {};
-    
-            await propertyController.updateImages(mockReq, mockRes);
-    
-            expect(mockRes.status).toHaveBeenCalledWith(404);
-            expect(mockRes.json).toHaveBeenCalledWith({ error: 'Imóvel não existe' });
-        });
+      expect(mockRes.status).toHaveBeenCalledWith(403);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        error: 'Ação não autorizada',
+      });
     });
 
-    describe('delete', () => {
-        it('should delete a property', async () => {
-            propertyService.deleleProperty.mockResolvedValue();
-            mockReq.params = { id: 'property-to-delete' };
-            mockReq.user = { id: 'fake-user-id' };
+    it('should return status 404 if property to update does not exist', async () => {
+      propertyService.updatePropertyImages.mockRejectedValue(
+        new Error('Imóvel não existe')
+      );
+      mockReq.params = { id: 'prop-id' };
+      mockReq.user = { id: 'wrong-user-id' };
+      mockReq.body = {};
 
-            await propertyController.delete(mockReq, mockRes);
-            
-            expect(propertyService.deleleProperty).toHaveBeenCalledWith('property-to-delete', 'fake-user-id');
-            expect(mockRes.status).toHaveBeenCalledWith(204);
-            expect(mockRes.send).toHaveBeenCalledOnce();
-        });
+      await propertyController.updateImages(mockReq, mockRes);
 
-        it('should return status 403 if the service throws an authorization error', async () => {
-            propertyService.deleleProperty.mockRejectedValue(new Error('Ação não autorizada'));
-            mockReq.params = { id: 'unauthorized-id' };
-            mockReq.user = { id: 'wrong-user-id' };
-
-            await propertyController.delete(mockReq, mockRes);
-
-            expect(mockRes.status).toHaveBeenCalledWith(403);
-            expect(mockRes.json).toHaveBeenCalledWith({error: 'Ação não autorizada'})
-        });
+      expect(mockRes.status).toHaveBeenCalledWith(404);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Imóvel não existe' });
     });
+  });
+
+  describe('delete', () => {
+    it('should delete a property', async () => {
+      propertyService.deleleProperty.mockResolvedValue();
+      mockReq.params = { id: 'property-to-delete' };
+      mockReq.user = { id: 'fake-user-id' };
+
+      await propertyController.delete(mockReq, mockRes);
+
+      expect(propertyService.deleleProperty).toHaveBeenCalledWith(
+        'property-to-delete',
+        'fake-user-id'
+      );
+      expect(mockRes.status).toHaveBeenCalledWith(204);
+      expect(mockRes.send).toHaveBeenCalledOnce();
+    });
+
+    it('should return status 403 if the service throws an authorization error', async () => {
+      propertyService.deleleProperty.mockRejectedValue(
+        new Error('Ação não autorizada')
+      );
+      mockReq.params = { id: 'unauthorized-id' };
+      mockReq.user = { id: 'wrong-user-id' };
+
+      await propertyController.delete(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(403);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        error: 'Ação não autorizada',
+      });
+    });
+  });
 });
