@@ -50,7 +50,7 @@ const propertyValuationService = {
         reserve: {
           select: {
             user: {
-              select: { id: true, name: true },
+              select: { id: true, name: true }, 
             },
           },
         },
@@ -61,17 +61,25 @@ const propertyValuationService = {
     });
 
     if (!valuations || valuations.length === 0) {
-      throw new Error('Nenhuma avaliação encontrada para este imóvel');
+      return [];
     }
 
-    const formattedValuations = valuations.map((valuation) => ({
-      ...valuation,
-      userBame: valuation.reserve.user.name,
-    }));
+    const formattedValuations = valuations.map((valuation) => {
+      const user = valuation.reserve?.user; 
+      
+      return {
+        id: valuation.id,
+        rating: valuation.noteProperty,
+        comment: valuation.commentProperty, 
+        reserveId: valuation.reserveId,
+        user: { 
+          id: user?.id || null,
+          name: user?.name || "Usuário Anônimo"
+        }
+      };
+    });
 
-    return formattedValuations.map(
-      (valuation) => new PropertyValuation(valuation)
-    );
+    return formattedValuations;
   },
 
   async deletePropertyValuation(valuationId, userId) {

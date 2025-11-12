@@ -148,16 +148,15 @@ describe('test propertyValuation service', () => {
         orderBy: { noteProperty: 'desc' },
       });
       expect(result).toHaveLength(2);
-      expect(result[0]).toBeInstanceOf(PropertyValuation);
-      expect(result[0].noteProperty).toBe(5);
+      expect(result[0].rating).toBe(5);
     });
 
-    it('should thorw error if no baluations are found', async () => {
+    it('should return an empty array if no valuations are found', async () => {
       prisma.propertyValuation.findMany.mockResolvedValue([]);
-
-      await expect(
-        propertyValuationService.getValuationsByProperty(propertyId)
-      ).rejects.toThrow('Nenhuma avaliação encontrada para este imóvel');
+    
+      const result = await propertyValuationService.getValuationsByProperty(propertyId);
+    
+      expect(result).toEqual([]);
     });
   });
 
