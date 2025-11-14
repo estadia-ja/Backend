@@ -1,3 +1,5 @@
+#!/bin/sh
+
 set -e
 
 echo "Verificando dependências do projeto..."
