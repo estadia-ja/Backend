@@ -61,14 +61,42 @@ const reserveService = {
         status: { not: 'CANCELADO' },
       },
       include: {
-        property: true,
-        user: true,
+        user: { 
+          select: { id: true, name: true } 
+        },
+        property: {
+          select: {
+            id: true,
+            type: true,
+            city: true,
+            dailyRate: true,
+            images: { 
+              take: 1, 
+              select: { id: true } 
+            }
+          }
+        },
+        propertyValuation: {
+          select: { id: true }
+        },
+        clientValuation: {
+          select: { id: true }
+        }
       },
       orderBy: {
         dateStart: 'asc',
       },
     });
-    return reservations.map((r) => new Reserve(r));
+    return reservations.map((res) => ({
+      id: res.id,
+      dateStart: res.dateStart,
+      dateEnd: res.dateEnd,
+      status: res.status,
+      property: res.property,
+      user: res.user,
+      propertyValuation: res.propertyValuation || null,
+      clientValuation: res.clientValuation || null
+    }));
   },
 
   async getReservationsForUser(userId) {
@@ -78,14 +106,40 @@ const reserveService = {
         status: { not: 'CANCELADO' },
       },
       include: {
-        property: true,
+        property: {
+          select: {
+            id: true,
+            type: true,
+            city: true,
+            dailyRate: true,
+            images: { 
+              take: 1, 
+              select: { id: true } 
+            }
+          }
+        },
+        propertyValuation: {
+          select: { id: true }
+        },
+        clientValuation: {
+          select: { id: true }
+        }
       },
       orderBy: {
         dateStart: 'asc',
       },
     });
 
-    return reservations.map((r) => new Reserve(r));
+    return reservations.map((res) => ({
+      id: res.id,
+      dateStart: res.dateStart,
+      dateEnd: res.dateEnd,
+      status: res.status,
+      property: res.property,
+      user: res.user,
+      propertyValuation: res.propertyValuation || null,
+      clientValuation: res.clientValuation || null
+    }));
   },
 
   async updateReserve(reserveId, userId, updateData) {

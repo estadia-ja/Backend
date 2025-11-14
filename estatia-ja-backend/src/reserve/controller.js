@@ -36,7 +36,7 @@ const reserveController = {
       const ownerId = req.user.id;
       const reservations =
         await reserveService.getReservationsForOwner(ownerId);
-      res.status(200).json(reservations.map((r) => r.toJSON()));
+      res.status(200).json(reservations);
     } catch (error) {
       res.status(500).json({ error: 'Erro ao buscar as reservas.' });
     }
@@ -46,7 +46,7 @@ const reserveController = {
     try {
       const userId = req.user.id;
       const reservations = await reserveService.getReservationsForUser(userId);
-      res.status(200).json(reservations.map((r) => r.toJSON()));
+      res.status(200).json(reservations);
     } catch (error) {
       res.status(500).json({ error: 'Erro ao buscar suas reservas.' });
     }
