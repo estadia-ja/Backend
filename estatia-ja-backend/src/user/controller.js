@@ -91,6 +91,42 @@ const userController = {
       res.status(404).json({ error: error.message });
     }
   },
+  async forgotPassword(req, res) {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ error: "Email é obrigatório." });
+      }
+      
+      await userService.requestPasswordReset(email);
+
+      res.status(200).json({ 
+        message: "Se este email estiver cadastrado, um link de recuperação foi enviado para o console." 
+      });
+    } catch (error) {
+      if (error.message === 'Usuário não encontrado') {
+        res.status(200).json({ 
+          message: "Se este email estiver cadastrado, um link de recuperação foi enviado para o console." 
+        });
+      } else {
+        res.status(500).json({ error: error.message });
+      }
+    }
+  },
+  async resetPassword(req, res) {
+    try {
+      const { token, password } = req.body;
+      if (!token || !password) {
+        return res.status(400).json({ error: "Token e nova senha são obrigatórios." });
+      }
+      
+      const result = await userService.resetPassword(token, password);
+      res.status(200).json(result);
+
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  },
 };
 
 export default userController;

@@ -242,4 +242,56 @@ router.post('/:id/upload', upload.single('image'), userController.uploadImage);
  */
 router.get('/:id/image', userController.getImage);
 
+/**
+ * @swagger
+ * /user/forgot-password:
+ *   post:
+ *     summary: Solicita a redefinição de senha
+ *     tags: [Usuários, Autenticação]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: "joao.silva@email.com"
+ *     responses:
+ *       '200':
+ *         description: "Se o email for válido, um link será enviado (simulado no console)."
+ *       '404':
+ *         description: "Email não encontrado (retorna 200 para segurança)."
+ */
+router.post('/forgot-password', userController.forgotPassword);
+
+/**
+ * @swagger
+ * /user/reset-password:
+ *   post:
+ *     summary: Efetua a redefinição da senha
+ *     tags: [Usuários, Autenticação]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: "O token JWT recebido no link de redefinição."
+ *               password:
+ *                 type: string
+ *                 example: "NovaSenha123!"
+ *                 description: "A nova senha (deve ser forte)."
+ *     responses:
+ *       '200':
+ *         description: "Senha atualizada com sucesso."
+ *       '400':
+ *         description: "Token inválido, expirado ou senha fraca."
+ */
+router.post('/reset-password', userController.resetPassword);
+
 export default router;

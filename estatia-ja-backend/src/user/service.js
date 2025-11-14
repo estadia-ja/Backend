@@ -1,6 +1,8 @@
 import bcrypt from 'bcrypt';
 import User from './model.js';
 import { prisma } from '../database.js';
+import { sendPasswordResetEmail } from '../lib/emailService.js';
+import jwt from 'jsonwebtoken';
 
 const userService = {
   async createUser(userData) {
@@ -216,6 +218,47 @@ const userService = {
     }
 
     return user.image;
+  },
+
+  async requestPasswordReset(email) {
+    const user = await prisma.user.findUnique({
+      where: { email: email },
+    });
+
+    if (!user) {
+      throw new Error('Usuário não encontrado');
+    }
+
+    const resetToken = jwt.sign(
+      { userId: user.id, type: 'PASSWORD_RESET' },
+      process.env.JWT_SECRET, 
+      { expiresIn: '15m' } 
+    );
+    
+    const resetLink = `http://localhost:5173/reset-password?token=${resetToken}`;
+    
+    await sendPasswordResetEmail(user.email, resetLink);
+
+    return { message: "Link de recuperação enviado." };
+  },
+
+  async resetPassword(token, newPassword) {
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+      throw new Error("Token inválido ou expirado.");
+    }
+    if (decoded.type !== 'PASSWORD_RESET' || !decoded.userId) {
+       throw new Error("Token inválido.");
+    }
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+    await prisma.user.update({
+      where: { id: decoded.userId },
+      data: { password: hashedPassword },
+    });
+    return { message: "Senha atualizada com sucesso." };
   },
 };
 
