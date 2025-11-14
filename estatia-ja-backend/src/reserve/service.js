@@ -61,8 +61,8 @@ const reserveService = {
         status: { not: 'CANCELADO' },
       },
       include: {
-        user: { 
-          select: { id: true, name: true } 
+        user: {
+          select: { id: true, name: true },
         },
         property: {
           select: {
@@ -70,18 +70,18 @@ const reserveService = {
             type: true,
             city: true,
             dailyRate: true,
-            images: { 
-              take: 1, 
-              select: { id: true } 
-            }
-          }
+            images: {
+              take: 1,
+              select: { id: true },
+            },
+          },
         },
         propertyValuation: {
-          select: { id: true }
+          select: { id: true },
         },
         clientValuation: {
-          select: { id: true }
-        }
+          select: { id: true },
+        },
       },
       orderBy: {
         dateStart: 'asc',
@@ -95,7 +95,7 @@ const reserveService = {
       property: res.property,
       user: res.user,
       propertyValuation: res.propertyValuation || null,
-      clientValuation: res.clientValuation || null
+      clientValuation: res.clientValuation || null,
     }));
   },
 
@@ -112,18 +112,18 @@ const reserveService = {
             type: true,
             city: true,
             dailyRate: true,
-            images: { 
-              take: 1, 
-              select: { id: true } 
-            }
-          }
+            images: {
+              take: 1,
+              select: { id: true },
+            },
+          },
         },
         propertyValuation: {
-          select: { id: true }
+          select: { id: true },
         },
         clientValuation: {
-          select: { id: true }
-        }
+          select: { id: true },
+        },
       },
       orderBy: {
         dateStart: 'asc',
@@ -138,7 +138,7 @@ const reserveService = {
       property: res.property,
       user: res.user,
       propertyValuation: res.propertyValuation || null,
-      clientValuation: res.clientValuation || null
+      clientValuation: res.clientValuation || null,
     }));
   },
 

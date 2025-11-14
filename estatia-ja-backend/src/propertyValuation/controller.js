@@ -38,9 +38,7 @@ const propertyValuationController = {
       const { propertyId } = req.params;
       const valuationProperty =
         await propertyValuationService.getValuationsByProperty(propertyId);
-      res
-        .status(200)
-        .json(valuationProperty);
+      res.status(200).json(valuationProperty);
     } catch (error) {
       if (
         error.message.includes('Nenhuma avaliação encontrada para este imóvel')

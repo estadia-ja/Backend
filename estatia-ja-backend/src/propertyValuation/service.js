@@ -50,7 +50,7 @@ const propertyValuationService = {
         reserve: {
           select: {
             user: {
-              select: { id: true, name: true }, 
+              select: { id: true, name: true },
             },
           },
         },
@@ -65,17 +65,17 @@ const propertyValuationService = {
     }
 
     const formattedValuations = valuations.map((valuation) => {
-      const user = valuation.reserve?.user; 
-      
+      const user = valuation.reserve?.user;
+
       return {
         id: valuation.id,
         rating: valuation.noteProperty,
-        comment: valuation.commentProperty, 
+        comment: valuation.commentProperty,
         reserveId: valuation.reserveId,
-        user: { 
+        user: {
           id: user?.id || null,
-          name: user?.name || "Usuário Anônimo"
-        }
+          name: user?.name || 'Usuário Anônimo',
+        },
       };
     });
 

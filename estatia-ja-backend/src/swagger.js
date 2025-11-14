@@ -8,7 +8,7 @@ const productionServer = {
 };
 
 const developmentServer = {
-  url: 'http://localhost:3000', 
+  url: 'http://localhost:3000',
   description: 'Servidor de Desenvolvimento',
 };
 
@@ -19,7 +19,9 @@ const swaggerDefinition = {
     version: '1.0.0',
     description: 'Documentação da api',
   },
-  servers: isProduction ? [productionServer, developmentServer] : [developmentServer, productionServer],
+  servers: isProduction
+    ? [productionServer, developmentServer]
+    : [developmentServer, productionServer],
   components: {
     securitySchemes: {
       bearerAuth: {

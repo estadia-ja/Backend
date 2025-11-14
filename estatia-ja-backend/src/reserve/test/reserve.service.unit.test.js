@@ -111,10 +111,10 @@ describe('test reserve service', () => {
             type: 'APARTMENT',
             city: 'Test City',
             dailyRate: 150,
-            images: [{ id: 'img-1' }]
+            images: [{ id: 'img-1' }],
           },
           propertyValuation: { id: 'pv-1' },
-          clientValuation: { id: 'cv-1' }
+          clientValuation: { id: 'cv-1' },
         },
         {
           id: 'res-2',
@@ -127,17 +127,17 @@ describe('test reserve service', () => {
             type: 'HOUSE',
             city: 'Other City',
             dailyRate: 200,
-            images: [{ id: 'img-2' }]
+            images: [{ id: 'img-2' }],
           },
-          propertyValuation: null, 
-          clientValuation: null 
-        }
+          propertyValuation: null,
+          clientValuation: null,
+        },
       ];
       prisma.reserve.findMany.mockResolvedValue(mockReservations);
       const ownerId = 'owner-id';
-  
+
       const result = await reserveService.getReservationsForOwner(ownerId);
-  
+
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual(
         expect.objectContaining({
@@ -148,7 +148,7 @@ describe('test reserve service', () => {
           property: expect.anything(),
           user: expect.anything(),
           propertyValuation: expect.anything(),
-          clientValuation: expect.anything()
+          clientValuation: expect.anything(),
         })
       );
     });
@@ -167,19 +167,19 @@ describe('test reserve service', () => {
             type: 'APARTMENT',
             city: 'Test City',
             dailyRate: 150,
-            images: [{ id: 'img-1' }]
+            images: [{ id: 'img-1' }],
           },
           propertyValuation: { id: 'pv-1' },
-          clientValuation: { id: 'cv-1' }
+          clientValuation: { id: 'cv-1' },
         },
       ];
       prisma.reserve.findMany.mockResolvedValue(mockReservations);
       const userId = 'user-id';
-  
+
       const result = await reserveService.getReservationsForUser(userId);
-  
-      expect(result).toHaveLength(mockReservations.length); 
-  
+
+      expect(result).toHaveLength(mockReservations.length);
+
       expect(result[0]).toEqual(
         expect.objectContaining({
           id: expect.anything(),
@@ -188,7 +188,7 @@ describe('test reserve service', () => {
           status: expect.anything(),
           property: expect.anything(),
           propertyValuation: expect.anything(),
-          clientValuation: expect.anything()
+          clientValuation: expect.anything(),
         })
       );
     });

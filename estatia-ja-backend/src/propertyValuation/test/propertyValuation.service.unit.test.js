@@ -153,9 +153,10 @@ describe('test propertyValuation service', () => {
 
     it('should return an empty array if no valuations are found', async () => {
       prisma.propertyValuation.findMany.mockResolvedValue([]);
-    
-      const result = await propertyValuationService.getValuationsByProperty(propertyId);
-    
+
+      const result =
+        await propertyValuationService.getValuationsByProperty(propertyId);
+
       expect(result).toEqual([]);
     });
   });
