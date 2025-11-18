@@ -19,7 +19,7 @@ const reserveController = {
         return res.status(409).json({ error: error.message });
       }
 
-      if (error.message.includes('Você não pode reservar seu própio imóvel.')) {
+      if (error.message.includes('Você não pode reservar seu próprio imóvel.')) {
         return res.status(403).json({ error: error.message });
       }
 

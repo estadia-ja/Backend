@@ -18,7 +18,7 @@ const reserveService = {
     }
 
     if (property.userId === userId) {
-      throw new Error('Você não pode reservar seu própio imóvel.');
+      throw new Error('Você não pode reservar seu próprio imóvel.');
     }
 
     const existingReserve = await prisma.reserve.findFirst({

@@ -164,7 +164,7 @@ describe('Reserve Routes - Integration Tests', () => {
 
       expect(response.status).toBe(403);
       expect(response.body.error).toContain(
-        'Você não pode reservar seu própio imóvel.'
+        'Você não pode reservar seu próprio imóvel.'
       );
     });
 

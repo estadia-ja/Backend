@@ -85,7 +85,7 @@ describe('test reserve service', () => {
       });
       await expect(
         reserveService.createReserve(propertyId, userId, reserveData)
-      ).rejects.toThrow('Você não pode reservar seu própio imóvel.');
+      ).rejects.toThrow('Você não pode reservar seu próprio imóvel.');
     });
 
     it('should throw an error if there is a date conflict', async () => {
