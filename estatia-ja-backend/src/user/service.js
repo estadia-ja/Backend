@@ -151,10 +151,11 @@ const userService = {
       throw new Error('Usuário não encontrado');
     }
 
-    if (userData.email && userData.email !== existingUser) {
+    if (userData.email && userData.email !== existingUser.email) {
       const emailExists = await prisma.user.findUnique({
         where: { email: userData.email },
       });
+      
       if (emailExists) {
         throw new Error('Email já esta em uso');
       }
@@ -197,7 +198,7 @@ const userService = {
   async updateImage(id, imageBuffer) {
     const user = await prisma.user.update({
       where: { id },
-      data: { image: imageBuffer },
+      data: { userImage: imageBuffer },
     });
 
     return new User(user);
@@ -206,18 +207,18 @@ const userService = {
   async getImage(id) {
     const user = await prisma.user.findUnique({
       where: { id: id },
-      select: { image: true },
+      select: { userImage: true },
     });
 
     if (!user) {
       throw new Error('Usuário não encontrada');
     }
 
-    if (!user.image) {
+    if (!user.userImage) {
       throw new Error('Imagem não encontrada');
     }
 
-    return user.image;
+    return user.userImage;
   },
 
   async requestPasswordReset(email) {

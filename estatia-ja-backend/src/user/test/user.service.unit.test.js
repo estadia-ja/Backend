@@ -159,13 +159,13 @@ describe('test user service', () => {
 
     it('should throw error if email already exist', async () => {
       prisma.user.findUnique
-        .mockResolvedValue({ id: 1, email: 'pedro@test.com' })
-        .mockResolvedValue({ id: 2, email: 'outropedro@test.com' });
-
+        .mockResolvedValueOnce({ id: 1, email: 'pedro@test.com' }) // primeira chamada (busca por ID)
+        .mockResolvedValueOnce({ id: 2, email: 'outropedro@test.com' }); // segunda chamada (busca por email)
+    
       await expect(
         userService.updateUser(1, { email: 'outropedro@test.com' })
       ).rejects.toThrowError('Email já esta em uso');
-
+    
       expect(prisma.user.findUnique).toHaveBeenCalledTimes(2);
     });
 
@@ -176,39 +176,46 @@ describe('test user service', () => {
         phones: ['(22) 11111-2222'],
       };
       const updatedUser = { id: userId, name: 'Pedro Atualizado' };
-
+    
+      // Mock da verificação inicial do usuário existente
+      prisma.user.findUnique.mockResolvedValueOnce({ id: userId, name: 'Pedro' });
+    
       const mockTx = {
         user: { update: vi.fn().mockResolvedValue(updatedUser) },
         phone: { deleteMany: vi.fn(), createMany: vi.fn() },
       };
+    
       prisma.$transaction.mockImplementation(
         async (callback) => await callback(mockTx)
       );
-
+    
       const finalUserInstance = new User({
         ...updatedUser,
         phones: [{ phone: updateData.phones[0] }],
       });
+    
       vi.spyOn(userService, 'getUserById').mockResolvedValue(finalUserInstance);
-
+    
       const result = await userService.updateUser(userId, updateData);
-
+    
       expect(prisma.$transaction).toHaveBeenCalledOnce();
-
+    
       expect(mockTx.user.update).toHaveBeenCalledWith({
         where: { id: userId },
         data: { name: 'Pedro Atualizado' },
       });
-
+    
       expect(mockTx.phone.deleteMany).toHaveBeenCalledWith({
         where: { userId },
       });
+    
       expect(mockTx.phone.createMany).toHaveBeenCalledWith({
         data: [{ phone: updateData.phones[0], userId }],
       });
+    
       expect(userService.getUserById).toHaveBeenCalledWith(userId);
       expect(result).toEqual(finalUserInstance);
-    });
+    });    
   });
 
   describe('deleteUser', () => {
@@ -245,7 +252,7 @@ describe('test user service', () => {
         id: 1,
         name: 'Pedro',
         email: 'pedro@test.com',
-        image: imageBuffer,
+        userImage: imageBuffer,
       };
 
       prisma.user.update.mockResolvedValue(userTest);
@@ -253,23 +260,23 @@ describe('test user service', () => {
 
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 1 },
-        data: { image: imageBuffer },
+        data: { userImage: imageBuffer },
       });
       expect(result).toBeInstanceOf(User);
-      expect(result.image).toEqual(imageBuffer);
+      expect(result.userImage).toEqual(imageBuffer);
     });
   });
 
   describe('getImage', () => {
     it('should return user image', async () => {
       const imageBuffer = Buffer.from('imageTest');
-      prisma.user.findUnique.mockResolvedValue({ image: imageBuffer });
+      prisma.user.findUnique.mockResolvedValue({ userImage: imageBuffer });
 
       const result = await userService.getImage(1);
 
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: 1 },
-        select: { image: true },
+        select: { userImage: true },
       });
       expect(result).toEqual(imageBuffer);
     });

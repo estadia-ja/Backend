@@ -7,6 +7,7 @@ class User {
     this.password = data.password;
     this.image = data.image;
     this.phones = data.phones || [];
+    this.userImage = data.userImage;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
     if (data.avgRating !== null && data.avgRating !== undefined) {
