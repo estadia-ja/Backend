@@ -1,19 +1,31 @@
-FROM node:18-slim
+FROM node:18-alpine AS builder
+
+RUN apk add --no-cache openssl
 
 WORKDIR /app
 
 COPY package*.json ./
+COPY prisma ./prisma/
 
-RUN npm install
+RUN npm ci
 
-RUN apt-get update -y && apt-get install -y openssl
+RUN npx prisma generate
 
 COPY . .
 
-COPY docker-entrypoint.sh /app/docker-entrypoint.sh
-RUN chmod +x /app/docker-entrypoint.sh
+FROM node:18-alpine
+
+RUN apk add --no-cache openssl
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/prisma ./prisma
 
 EXPOSE 3000
 
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["npm", "run", "dev"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]

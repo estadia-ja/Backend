@@ -55,7 +55,9 @@ services:
       - estadia_ja_network
 
   app:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
     container_name: node_app
     ports:
       - '3000:3000'
