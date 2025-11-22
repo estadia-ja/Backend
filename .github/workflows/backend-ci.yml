@@ -1,0 +1,55 @@
+name: Backend Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  validate-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout do Código
+      uses: actions/checkout@v4
+
+    - name: Gerar arquivos .env e .env.test
+      run: |
+        # --- Criando .env (Para o docker-compose subir o app e db) ---
+        echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+        echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+        echo "POSTGRES_DB=${{ secrets.POSTGRES_DB}}" >> .env
+        echo "PORT=3000" >> .env
+        # URL para a APP se conectar ao DB principal
+        echo "DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@db:5432/estadia_db" >> .env
+        
+        # --- Criando .env.test (Para o script 'npm run test:integration:run') ---
+        # IMPORTANTE: Note que o host aqui é 'db-test', o nome do serviço no docker-compose
+        echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env.test
+        echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env.test
+        echo "POSTGRES_DB=${{secrets.POSTGRES_DB_TEST}}" >> .env.test
+        echo "DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@db-test:5432/estadia_test_db" >> .env.test
+        
+        # Se tiver JWT_SECRET ou outras chaves, adicione também:
+        # echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+        # echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.test
+
+    - name: Criar Rede Docker
+      run: docker network create estadia_ja_network
+
+    - name: Build e Verificar se Sobe
+      run: |
+        docker compose up -d --build db app
+        sleep 10 # Espera o banco inicializar
+        if [ $(docker ps -q -f name=node_app | wc -l) -eq 0 ]; then echo "App falhou ao subir"; exit 1; fi
+
+    - name: Executar Testes (Unit + Integration)
+      run: docker compose up --exit-code-from tester tester
+
+    - name: Executar Lint
+      run: docker compose run --rm app npm run lint
+
+    - name: Derrubar Containers
+      if: always()
+      run: docker compose down
